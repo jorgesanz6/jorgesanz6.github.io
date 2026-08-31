@@ -63,7 +63,7 @@ function AskWidget() {
     <section className={styles.section} id="pregunta">
       <h2 className={styles.sectionTitle}>Pregúntame algo</h2>
       <p className={styles.askHint}>
-        Respuestas automáticas generadas a partir de los datos de esta página — reglas simples, no un modelo de IA real.
+        Respuestas automáticas generadas a partir de los datos de esta página — reglas simples, no un modelo de IA real (por ahora).
       </p>
 
       <div className={styles.askChips}>
@@ -126,7 +126,7 @@ function CvCapture({ visible, onDone }) {
           }}
         >
           <p className={styles.cvCaptureHook}>
-            ¿Quieres que te avise cuando actualice el CV? Deja tu email (opcional).
+            ¿Quieres que te avise cuando actualice el CV? Deja tu email.
           </p>
           <div className={styles.cvCaptureRow}>
             <input
