@@ -95,6 +95,113 @@ function Reveal({ children, className }) {
   )
 }
 
+const QUERY_SEGMENTS = [
+  { text: 'SELECT ', kw: true },
+  { text: 'impacto ' },
+  { text: 'FROM ', kw: true },
+  { text: 'jorge ' },
+  { text: 'WHERE ', kw: true },
+  { text: 'año >= ' },
+  { text: '2022', str: true },
+  { text: ';' },
+]
+const QUERY_TEXT = QUERY_SEGMENTS.map((s) => s.text).join('')
+
+function TerminalStats({ stats }) {
+  const ref = useRef(null)
+  const [active, setActive] = useState(false)
+  const [typed, setTyped] = useState(0)
+  const [rowsShown, setRowsShown] = useState(0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduceMotion || typeof IntersectionObserver === 'undefined') {
+      setTyped(QUERY_TEXT.length)
+      setRowsShown(stats.length)
+      return
+    }
+
+    const rect = el.getBoundingClientRect()
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setActive(true)
+      return
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setActive(true)
+          io.disconnect()
+        }
+      },
+      { threshold: 0.3 }
+    )
+    io.observe(el)
+
+    const fallback = setTimeout(() => setActive(true), 2500)
+
+    return () => {
+      io.disconnect()
+      clearTimeout(fallback)
+    }
+  }, [stats.length])
+
+  useEffect(() => {
+    if (!active || typed >= QUERY_TEXT.length) return
+    const t = setTimeout(() => setTyped((n) => n + 1), 18)
+    return () => clearTimeout(t)
+  }, [active, typed])
+
+  useEffect(() => {
+    if (typed < QUERY_TEXT.length || rowsShown >= stats.length) return
+    const t = setTimeout(() => setRowsShown((n) => n + 1), 160)
+    return () => clearTimeout(t)
+  }, [typed, rowsShown, stats.length])
+
+  let remaining = typed
+  const segments = QUERY_SEGMENTS.map((seg, i) => {
+    const take = Math.max(0, Math.min(seg.text.length, remaining))
+    remaining -= seg.text.length
+    if (take === 0) return null
+    const cls = seg.kw ? styles.terminalKw : seg.str ? styles.terminalStr : undefined
+    return (
+      <span key={i} className={cls}>
+        {seg.text.slice(0, take)}
+      </span>
+    )
+  })
+
+  const queryDone = typed >= QUERY_TEXT.length
+
+  return (
+    <div className={styles.terminal} ref={ref}>
+      <div className={styles.terminalBar}>
+        <span className={styles.terminalDot} style={{ background: '#f87171' }} />
+        <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
+        <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
+      </div>
+      <div className={styles.terminalBody}>
+        <div className={styles.terminalQuery}>
+          {segments}
+          {!queryDone && <span className={styles.terminalCursor} />}
+        </div>
+        {stats.map((s, i) => (
+          <div
+            key={s.key}
+            className={`${styles.terminalRow} ${i < rowsShown ? styles.terminalRowVisible : styles.terminalRowHidden}`}
+          >
+            <span className={styles.terminalField}>{s.key}</span>
+            <span className={styles.terminalValue}>{s.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function SectionHeading({ kicker, title }) {
   return (
     <h2 className={styles.sectionTitle}>
@@ -335,26 +442,7 @@ export default function Home() {
             <div className={styles.container}>
               <Reveal>
                 <h2 className={styles.srOnly}>Impacto</h2>
-                <div className={styles.terminal}>
-                  <div className={styles.terminalBar}>
-                    <span className={styles.terminalDot} style={{ background: '#f87171' }} />
-                    <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
-                    <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
-                  </div>
-                  <div className={styles.terminalBody}>
-                    <div className={styles.terminalQuery}>
-                      <span className={styles.terminalKw}>SELECT</span> impacto{' '}
-                      <span className={styles.terminalKw}>FROM</span> jorge{' '}
-                      <span className={styles.terminalKw}>WHERE</span> año {'>='} <span className={styles.terminalStr}>2022</span>;
-                    </div>
-                    {stats.map((s) => (
-                      <div key={s.key} className={styles.terminalRow}>
-                        <span className={styles.terminalField}>{s.key}</span>
-                        <span className={styles.terminalValue}>{s.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <TerminalStats stats={stats} />
                 <p className={styles.statsCaption}>
                   {stats.map((s) => s.label).join(' · ')}
                 </p>
