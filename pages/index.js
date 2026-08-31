@@ -258,14 +258,30 @@ export default function Home() {
 
           {/* IMPACTO */}
           <section className={styles.statsSection}>
-            <div className={styles.statsGrid}>
-              {stats.map((s) => (
-                <div key={s.label} className={styles.statTile}>
-                  <span className={styles.statValue}>{s.value}</span>
-                  <span className={styles.statLabel}>{s.label}</span>
+            <h2 className={styles.srOnly}>Impacto</h2>
+            <div className={styles.terminal}>
+              <div className={styles.terminalBar}>
+                <span className={styles.terminalDot} style={{ background: '#f87171' }} />
+                <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
+                <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
+              </div>
+              <div className={styles.terminalBody}>
+                <div className={styles.terminalQuery}>
+                  <span className={styles.terminalKw}>SELECT</span> impacto{' '}
+                  <span className={styles.terminalKw}>FROM</span> jorge{' '}
+                  <span className={styles.terminalKw}>WHERE</span> año {'>='} <span className={styles.terminalStr}>2022</span>;
                 </div>
-              ))}
+                {stats.map((s) => (
+                  <div key={s.key} className={styles.terminalRow}>
+                    <span className={styles.terminalField}>{s.key}</span>
+                    <span className={styles.terminalValue}>{s.value}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+            <p className={styles.statsCaption}>
+              {stats.map((s) => s.label).join(' · ')}
+            </p>
           </section>
 
           {/* SKILLS */}
