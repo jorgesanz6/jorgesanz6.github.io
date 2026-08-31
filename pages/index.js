@@ -1,7 +1,8 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
-import { profile, skills, projects, experience, cvUrl } from '../lib/data'
+import { profile, skills, projects, experience, cvUrl, cvFilename } from '../lib/data'
 import { getAnswer, suggestions } from '../lib/faq'
+import { notifyCvDownload, notifyCvEmailOptIn } from '../lib/notify'
 import styles from '../styles/Home.module.css'
 
 function ThemeToggle() {
@@ -104,7 +105,58 @@ function AskWidget() {
   )
 }
 
+function CvCapture({ visible, onDone }) {
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+
+  if (!visible) return null
+
+  return (
+    <div className={styles.cvCapture}>
+      {submitted ? (
+        <p className={styles.cvCaptureThanks}>Hecho, te aviso cuando lo actualice. Gracias 🙌</p>
+      ) : (
+        <form
+          className={styles.cvCaptureForm}
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!email.trim()) return
+            notifyCvEmailOptIn(email.trim())
+            setSubmitted(true)
+          }}
+        >
+          <p className={styles.cvCaptureHook}>
+            ¿Quieres que te avise cuando actualice el CV? Deja tu email (opcional).
+          </p>
+          <div className={styles.cvCaptureRow}>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@email.com"
+              className={styles.askInput}
+              aria-label="Tu email"
+            />
+            <button type="submit" className={styles.askSubmit}>Avísame</button>
+            <button type="button" className={styles.cvCaptureDismiss} onClick={onDone}>
+              No, gracias
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
+  )
+}
+
 export default function Home() {
+  const [cvClicked, setCvClicked] = useState(false)
+
+  function handleCvClick() {
+    notifyCvDownload()
+    setCvClicked(true)
+  }
+
   return (
     <>
       <Head>
@@ -181,8 +233,9 @@ export default function Home() {
               <a href="#contacto" className={styles.btnPrimary}>Contactar</a>
               <a
                 href={cvUrl}
-                download
+                download={cvFilename}
                 data-goatcounter-click="cv-download"
+                onClick={handleCvClick}
                 className={styles.btnSecondary}
               >
                 Descargar CV
@@ -196,6 +249,7 @@ export default function Home() {
                 GitHub
               </a>
             </div>
+            <CvCapture visible={cvClicked} onDone={() => setCvClicked(false)} />
           </section>
 
           {/* SKILLS */}
@@ -277,8 +331,9 @@ export default function Home() {
             </div>
             <a
               href={cvUrl}
-              download
+              download={cvFilename}
               data-goatcounter-click="cv-download"
+              onClick={handleCvClick}
               className={styles.projectLink}
             >
               Ver historial completo en el CV →
@@ -304,12 +359,6 @@ export default function Home() {
                 className={styles.contactLinkItem}
               >
                 GitHub
-              </a>
-              <a
-                href={`mailto:${profile.email}?subject=${encodeURIComponent('Avísame cuando actualices el CV')}&body=${encodeURIComponent('Hola Jorge, avísame cuando publiques una versión nueva del CV.')}`}
-                className={styles.contactLinkItem}
-              >
-                Avísame si actualizas el CV
               </a>
             </div>
           </section>

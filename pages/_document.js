@@ -16,6 +16,11 @@ export default function Document() {
     <Html lang="es">
       <Head>
         <script dangerouslySetInnerHTML={{ __html: setInitialTheme }} />
+        <script
+          data-goatcounter="https://jorgesanz6.goatcounter.com/count"
+          async
+          src="//gc.zgo.at/count.js"
+        />
       </Head>
       <body>
         <Main />
