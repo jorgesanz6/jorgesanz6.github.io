@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { profile, skills, projects, experience, cvUrl, cvFilename, stats, methodology, methodologyIntro } from '../lib/data'
 import { getAnswer, suggestions } from '../lib/faq'
 import { notifyCvDownload, notifyCvEmailOptIn } from '../lib/notify'
@@ -220,46 +221,177 @@ function SectionHeading({ kicker, title }) {
   )
 }
 
-function ProjectGallery({ images, name }) {
-  const [open, setOpen] = useState(null)
+function ProjectDetailBody({ project }) {
+  return (
+    <>
+      <p className={styles.projectDesc}>{project.description}</p>
+      <div className={styles.projectTech}>
+        {project.tech.map((t) => (
+          <span key={t} className={styles.techTag}>{t}</span>
+        ))}
+      </div>
+      {project.problem && (
+        <div className={styles.projectDetailBlock}>
+          <span className={styles.projectDetailLabel}>Problema</span>
+          <p>{project.problem}</p>
+        </div>
+      )}
+      {project.approach && (
+        <div className={styles.projectDetailBlock}>
+          <span className={styles.projectDetailLabel}>Enfoque</span>
+          {Array.isArray(project.approach) ? (
+            <ul className={styles.detailList}>
+              {project.approach.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>{project.approach}</p>
+          )}
+        </div>
+      )}
+      {project.url && (
+        <a href={project.url} target="_blank" rel="noopener noreferrer" className={styles.projectLink}>
+          Ver proyecto →
+        </a>
+      )}
+    </>
+  )
+}
+
+function ProjectModal({ project, onClose }) {
+  const [imgIndex, setImgIndex] = useState(0)
+  const [mounted, setMounted] = useState(false)
+  const images = project.images || []
 
   useEffect(() => {
-    if (open === null) return
+    setMounted(true)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  useEffect(() => {
     function onKey(e) {
-      if (e.key === 'Escape') setOpen(null)
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowRight') setImgIndex((i) => Math.min(i + 1, images.length - 1))
+      if (e.key === 'ArrowLeft') setImgIndex((i) => Math.max(i - 1, 0))
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  }, [images.length, onClose])
+
+  if (!mounted) return null
+
+  return createPortal(
+    <div className={styles.modalOverlay} onClick={onClose} role="dialog" aria-modal="true" aria-label={project.name}>
+      <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+        <button type="button" className={styles.modalClose} onClick={onClose} aria-label="Cerrar">×</button>
+
+        <div className={styles.modalHeader}>
+          <h3 className={styles.modalTitle}>{project.name}</h3>
+          <span className={styles.projectStatus}>{project.status}</span>
+        </div>
+
+        {images.length > 0 && (
+          <div className={styles.modalGallery}>
+            <div className={styles.modalMainImage}>
+              {images.length > 1 && (
+                <button
+                  type="button"
+                  className={`${styles.modalNav} ${styles.modalNavPrev}`}
+                  onClick={() => setImgIndex((i) => (i - 1 + images.length) % images.length)}
+                  aria-label="Captura anterior"
+                >
+                  ‹
+                </button>
+              )}
+              <img src={images[imgIndex]} alt={`${project.name} — captura ${imgIndex + 1}`} />
+              {images.length > 1 && (
+                <button
+                  type="button"
+                  className={`${styles.modalNav} ${styles.modalNavNext}`}
+                  onClick={() => setImgIndex((i) => (i + 1) % images.length)}
+                  aria-label="Captura siguiente"
+                >
+                  ›
+                </button>
+              )}
+              {images.length > 1 && (
+                <span className={styles.modalCounter}>{imgIndex + 1} / {images.length}</span>
+              )}
+            </div>
+            {images.length > 1 && (
+              <div className={styles.modalThumbs}>
+                {images.map((src, i) => (
+                  <button
+                    key={src}
+                    type="button"
+                    className={`${styles.modalThumb} ${i === imgIndex ? styles.modalThumbActive : ''}`}
+                    onClick={() => setImgIndex(i)}
+                    aria-label={`Ver captura ${i + 1}`}
+                  >
+                    <img src={src} alt="" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className={styles.modalBody}>
+          <ProjectDetailBody project={project} />
+        </div>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
+function ProjectsSection({ projects: list }) {
+  const [activeIndex, setActiveIndex] = useState(null)
 
   return (
     <>
-      <div className={styles.gallery}>
-        {images.map((src, i) => (
-          <button
-            key={src}
-            type="button"
-            className={styles.galleryThumb}
-            onClick={() => setOpen(i)}
-            aria-label={`Ampliar captura ${i + 1} de ${name}`}
-          >
-            <img src={src} alt={`${name} — captura ${i + 1}`} loading="lazy" />
-          </button>
+      <div className={styles.projectList}>
+        {list.map((p, i) => (
+          <div key={i} className={styles.project}>
+            <span className={styles.projectNumber}>{String(i + 1).padStart(2, '0')}</span>
+            <div className={styles.projectBody}>
+              <div className={styles.projectHeader}>
+                <span className={styles.projectName}>{p.name}</span>
+                <span className={styles.projectStatus}>{p.status}</span>
+              </div>
+              <p className={styles.projectDesc}>{p.description}</p>
+              <div className={styles.projectTech}>
+                {p.tech.map((t) => (
+                  <span key={t} className={styles.techTag}>{t}</span>
+                ))}
+              </div>
+              {p.images && (
+                <button
+                  type="button"
+                  className={styles.projectCover}
+                  onClick={() => setActiveIndex(i)}
+                  aria-label={`Ver capturas de ${p.name}`}
+                >
+                  <img src={p.images[0]} alt={`${p.name} — vista previa`} loading="lazy" />
+                  {p.images.length > 1 && (
+                    <span className={styles.projectCoverCount}>+{p.images.length - 1} más</span>
+                  )}
+                </button>
+              )}
+              <button type="button" className={styles.projectLink} onClick={() => setActiveIndex(i)}>
+                Ver detalle →
+              </button>
+            </div>
+          </div>
         ))}
       </div>
 
-      {open !== null && (
-        <div className={styles.lightbox} onClick={() => setOpen(null)} role="dialog" aria-modal="true">
-          <img
-            src={images[open]}
-            alt={`${name} — captura ${open + 1}`}
-            className={styles.lightboxImg}
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button type="button" className={styles.lightboxClose} onClick={() => setOpen(null)} aria-label="Cerrar">
-            ×
-          </button>
-        </div>
+      {activeIndex !== null && (
+        <ProjectModal project={list[activeIndex]} onClose={() => setActiveIndex(null)} />
       )}
     </>
   )
@@ -557,56 +689,7 @@ export default function Home() {
             <div className={styles.container}>
               <Reveal>
                 <SectionHeading kicker="Portfolio" title="Proyectos" />
-                <div className={styles.projectList}>
-                  {projects.map((p, i) => (
-                    <div key={i} className={styles.project}>
-                      <span className={styles.projectNumber}>{String(i + 1).padStart(2, '0')}</span>
-                      <div className={styles.projectBody}>
-                        <div className={styles.projectHeader}>
-                          <span className={styles.projectName}>{p.name}</span>
-                          <span className={styles.projectStatus}>{p.status}</span>
-                        </div>
-                        <p className={styles.projectDesc}>{p.description}</p>
-                        <div className={styles.projectTech}>
-                          {p.tech.map((t) => (
-                            <span key={t} className={styles.techTag}>{t}</span>
-                          ))}
-                        </div>
-                        {p.images && <ProjectGallery images={p.images} name={p.name} />}
-                        {(p.problem || p.approach) && (
-                          <details className={styles.projectDetails}>
-                            <summary>Más detalle</summary>
-                            {p.problem && (
-                              <div className={styles.projectDetailBlock}>
-                                <span className={styles.projectDetailLabel}>Problema</span>
-                                <p>{p.problem}</p>
-                              </div>
-                            )}
-                            {p.approach && (
-                              <div className={styles.projectDetailBlock}>
-                                <span className={styles.projectDetailLabel}>Enfoque</span>
-                                {Array.isArray(p.approach) ? (
-                                  <ul className={styles.detailList}>
-                                    {p.approach.map((line) => (
-                                      <li key={line}>{line}</li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <p>{p.approach}</p>
-                                )}
-                              </div>
-                            )}
-                          </details>
-                        )}
-                        {p.url && (
-                          <a href={p.url} target="_blank" rel="noopener noreferrer" className={styles.projectLink}>
-                            Ver proyecto →
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ProjectsSection projects={projects} />
               </Reveal>
             </div>
           </section>
