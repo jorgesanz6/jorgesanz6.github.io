@@ -1,0 +1,358 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* NAV */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(248, 249, 250, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+}
+
+.navName {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.navLinks {
+  display: flex;
+  gap: 2rem;
+}
+
+.navLinks a {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+
+.navLinks a:hover {
+  color: var(--text);
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  width: 100%;
+}
+
+/* HERO */
+.hero {
+  padding: 5rem 0 4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.heroStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.heroName {
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+}
+
+.heroRole {
+  font-size: 1.05rem;
+  color: var(--accent);
+  font-weight: 400;
+  margin-bottom: 1.25rem;
+}
+
+.heroBio {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 560px;
+  margin-bottom: 2rem;
+}
+
+.heroActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btnPrimary {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.55rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.btnPrimary:hover { background: #1d4ed8; }
+
+.btnSecondary {
+  display: inline-block;
+  background: transparent;
+  color: var(--text);
+  padding: 0.55rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btnSecondary:hover {
+  border-color: var(--text-muted);
+}
+
+/* SECTIONS */
+.section {
+  padding: 3.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 1.75rem;
+}
+
+/* SKILLS */
+.skillsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.skillGroupName {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.skillTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag {
+  font-size: 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.2rem 0.65rem;
+  border-radius: 4px;
+}
+
+/* PROJECTS */
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.project {
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.project:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.projectHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+}
+
+.projectName {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.projectStatus {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.projectDesc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin-bottom: 0.85rem;
+}
+
+.projectTech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.techTag {
+  font-size: 0.75rem;
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.projectLink {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+/* EXPERIENCE */
+.expList {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.expItem {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 1.5rem;
+}
+
+.expPeriod {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding-top: 0.15rem;
+  line-height: 1.4;
+}
+
+.expRole {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+
+.expCompany {
+  font-size: 0.82rem;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+.expDesc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* CONTACT */
+.contactSection {
+  padding: 4rem 0 3rem;
+}
+
+.contactTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.01em;
+}
+
+.contactSub {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  max-width: 460px;
+}
+
+.contactEmail {
+  display: inline-block;
+  font-size: 1rem;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.contactEmail:hover {
+  border-color: var(--accent);
+}
+
+.contactLinks {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.contactLinkItem {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+
+.contactLinkItem:hover {
+  color: var(--text);
+}
+
+/* FOOTER */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  max-width: var(--max-w);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .nav { padding: 0 1rem; }
+  .navLinks { gap: 1.25rem; }
+  .hero { padding: 3rem 0 2.5rem; }
+  .skillsGrid { grid-template-columns: 1fr; gap: 1rem; }
+  .expItem { grid-template-columns: 1fr; gap: 0.25rem; }
+  .expPeriod { padding-top: 0; }
+  .footer { flex-direction: column; gap: 0.25rem; text-align: center; }
+}
