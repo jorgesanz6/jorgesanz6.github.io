@@ -55,6 +55,18 @@ function Reveal({ children, className }) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true)
+      return
+    }
+
+    const rect = el.getBoundingClientRect()
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setVisible(true)
+      return
+    }
+
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -65,7 +77,15 @@ function Reveal({ children, className }) {
       { threshold: 0.12 }
     )
     io.observe(el)
-    return () => io.disconnect()
+
+    // Safety net: never leave content permanently invisible if the
+    // observer misbehaves (fail open, not closed).
+    const fallback = setTimeout(() => setVisible(true), 2500)
+
+    return () => {
+      io.disconnect()
+      clearTimeout(fallback)
+    }
   }, [])
 
   return (
@@ -96,7 +116,7 @@ function AskWidget() {
   }
 
   return (
-    <section className={styles.band} id="pregunta">
+    <section className={`${styles.band} ${styles.section}`} id="pregunta">
       <div className={styles.container}>
         <Reveal>
           <SectionHeading kicker="Charla rápida" title="Pregúntame algo" />
