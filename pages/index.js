@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import { profile, skills, projects, experience } from '../lib/data'
+import { getAnswer, suggestions } from '../lib/faq'
 import styles from '../styles/Home.module.css'
 
 function ThemeToggle() {
@@ -46,6 +47,63 @@ function ThemeToggle() {
   )
 }
 
+function AskWidget() {
+  const [query, setQuery] = useState('')
+  const [log, setLog] = useState([])
+
+  function ask(question) {
+    if (!question.trim()) return
+    const answer = getAnswer(question)
+    setLog((prev) => [...prev, { question, answer }])
+    setQuery('')
+  }
+
+  return (
+    <section className={styles.section} id="pregunta">
+      <h2 className={styles.sectionTitle}>Pregúntame algo</h2>
+      <p className={styles.askHint}>
+        Respuestas automáticas generadas a partir de los datos de esta página — reglas simples, no un modelo de IA real.
+      </p>
+
+      <div className={styles.askChips}>
+        {suggestions.map((s) => (
+          <button key={s} className={styles.askChip} onClick={() => ask(s)}>
+            {s}
+          </button>
+        ))}
+      </div>
+
+      <form
+        className={styles.askForm}
+        onSubmit={(e) => {
+          e.preventDefault()
+          ask(query)
+        }}
+      >
+        <input
+          className={styles.askInput}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Escribe tu pregunta..."
+          aria-label="Escribe tu pregunta"
+        />
+        <button type="submit" className={styles.askSubmit}>Preguntar</button>
+      </form>
+
+      {log.length > 0 && (
+        <div className={styles.askLog}>
+          {log.map((item, i) => (
+            <div key={i} className={styles.askItem}>
+              <p className={styles.askQ}>{item.question}</p>
+              <p className={styles.askA}>{item.answer}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
 export default function Home() {
   return (
     <>
@@ -75,6 +133,7 @@ export default function Home() {
           <div className={styles.navLinks}>
             <a href="#proyectos">Proyectos</a>
             <a href="#experiencia">Experiencia</a>
+            <a href="#pregunta">Pregúntame</a>
             <a href="#contacto">Contacto</a>
             <ThemeToggle />
           </div>
@@ -84,7 +143,9 @@ export default function Home() {
 
           {/* HERO */}
           <section className={styles.hero}>
-            <div className={styles.avatar}>JS</div>
+            <div className={styles.avatarRing}>
+              <img src="/avatar.jpg" alt={profile.name} className={styles.avatar} />
+            </div>
             {profile.available && (
               <div className={styles.heroStatus}>
                 <span className={styles.dot} />
@@ -140,6 +201,23 @@ export default function Home() {
                       <span key={t} className={styles.techTag}>{t}</span>
                     ))}
                   </div>
+                  {(p.problem || p.approach) && (
+                    <details className={styles.projectDetails}>
+                      <summary>Más detalle</summary>
+                      {p.problem && (
+                        <div className={styles.projectDetailBlock}>
+                          <span className={styles.projectDetailLabel}>Problema</span>
+                          <p>{p.problem}</p>
+                        </div>
+                      )}
+                      {p.approach && (
+                        <div className={styles.projectDetailBlock}>
+                          <span className={styles.projectDetailLabel}>Enfoque</span>
+                          <p>{p.approach}</p>
+                        </div>
+                      )}
+                    </details>
+                  )}
                   {p.url && (
                     <a href={p.url} target="_blank" rel="noopener noreferrer" className={styles.projectLink}>
                       Ver proyecto →
@@ -168,6 +246,8 @@ export default function Home() {
               ))}
             </div>
           </section>
+
+          <AskWidget />
 
           {/* CONTACTO */}
           <section className={styles.contactSection} id="contacto">
