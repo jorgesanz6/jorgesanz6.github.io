@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useEffect, useRef, useState } from 'react'
-import { profile, skills, projects, experience, cvUrl, cvFilename, stats, methodology } from '../lib/data'
+import { profile, skills, projects, experience, cvUrl, cvFilename, stats, methodology, methodologyIntro } from '../lib/data'
 import { getAnswer, suggestions } from '../lib/faq'
 import { notifyCvDownload, notifyCvEmailOptIn } from '../lib/notify'
 import styles from '../styles/Home.module.css'
@@ -94,6 +94,15 @@ function Reveal({ children, className }) {
     </div>
   )
 }
+
+const ICON_PROPS = { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }
+
+const METHOD_ICONS = [
+  <svg key="search" {...ICON_PROPS}><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35" /></svg>,
+  <svg key="database" {...ICON_PROPS}><ellipse cx="12" cy="6" rx="8" ry="3" /><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6" /><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6" /></svg>,
+  <svg key="gear" {...ICON_PROPS}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>,
+  <svg key="trending" {...ICON_PROPS}><path d="M23 6l-9.5 9.5-5-5L1 18" /><path d="M17 6h6v6" /></svg>,
+]
 
 const QUERY_SEGMENTS = [
   { text: 'SELECT ', kw: true },
@@ -476,10 +485,11 @@ export default function Home() {
             <div className={styles.container}>
               <Reveal>
                 <SectionHeading kicker="Metodología" title="Cómo trabajo" />
+                <p className={styles.methodIntro}>{methodologyIntro}</p>
                 <div className={styles.methodList}>
                   {methodology.map((step, i) => (
                     <div key={step.title} className={styles.methodItem}>
-                      <span className={styles.methodNumber}>{String(i + 1).padStart(2, '0')}</span>
+                      <span className={styles.methodNumber}>{METHOD_ICONS[i]}</span>
                       <div>
                         <p className={styles.methodTitle}>{step.title}</p>
                         <p className={styles.methodDesc}>{step.description}</p>
@@ -556,6 +566,29 @@ export default function Home() {
                         <p className={styles.expRole}>{e.role}</p>
                         <p className={styles.expCompany}>{e.company}</p>
                         <p className={styles.expDesc}>{e.description}</p>
+                        {(e.problem || e.approach || e.impact) && (
+                          <details className={styles.projectDetails}>
+                            <summary>Ver caso completo</summary>
+                            {e.problem && (
+                              <div className={styles.projectDetailBlock}>
+                                <span className={styles.projectDetailLabel}>Problema</span>
+                                <p>{e.problem}</p>
+                              </div>
+                            )}
+                            {e.approach && (
+                              <div className={styles.projectDetailBlock}>
+                                <span className={styles.projectDetailLabel}>Qué hice</span>
+                                <p>{e.approach}</p>
+                              </div>
+                            )}
+                            {e.impact && (
+                              <div className={styles.projectDetailBlock}>
+                                <span className={styles.projectDetailLabel}>Impacto</span>
+                                <p>{e.impact}</p>
+                              </div>
+                            )}
+                          </details>
+                        )}
                       </div>
                     </div>
                   ))}
