@@ -5,9 +5,11 @@
 :root {
   --base: #F8F9FA;
   --surface: #FFFFFF;
+  --band-tint: #F1F0EC;
   --text: #0F172A;
   --text-muted: #64748B;
   --accent: #2563EB;
+  --accent-2: #7C3AED;
   --accent-light: #EFF6FF;
   --accent-btn: #2563EB;
   --border: #E2E8F0;
@@ -15,16 +17,18 @@
   --font: 'Inter', system-ui, sans-serif;
   --font-heading: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --max-w: 680px;
+  --max-w: 900px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --base: #0B1120;
     --surface: #111827;
+    --band-tint: #0E1626;
     --text: #E2E8F0;
     --text-muted: #94A3B8;
     --accent: #3B82F6;
+    --accent-2: #A78BFA;
     --accent-light: rgba(59, 130, 246, 0.15);
     --accent-btn: #2563EB;
     --border: #1E293B;
@@ -35,9 +39,11 @@
 :root[data-theme="dark"] {
   --base: #0B1120;
   --surface: #111827;
+  --band-tint: #0E1626;
   --text: #E2E8F0;
   --text-muted: #94A3B8;
   --accent: #3B82F6;
+  --accent-2: #A78BFA;
   --accent-light: rgba(59, 130, 246, 0.15);
   --border: #1E293B;
   --nav-bg: rgba(11, 17, 32, 0.85);

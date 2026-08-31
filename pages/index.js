@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { profile, skills, projects, experience, cvUrl, cvFilename, stats, methodology } from '../lib/data'
 import { getAnswer, suggestions } from '../lib/faq'
 import { notifyCvDownload, notifyCvEmailOptIn } from '../lib/notify'
@@ -48,6 +48,42 @@ function ThemeToggle() {
   )
 }
 
+function Reveal({ children, className }) {
+  const ref = useRef(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          io.disconnect()
+        }
+      },
+      { threshold: 0.12 }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  return (
+    <div ref={ref} className={`${styles.reveal} ${visible ? styles.revealVisible : ''} ${className || ''}`}>
+      {children}
+    </div>
+  )
+}
+
+function SectionHeading({ kicker, title }) {
+  return (
+    <h2 className={styles.sectionTitle}>
+      <span className={styles.sectionKicker}>{kicker}</span>
+      {title}
+    </h2>
+  )
+}
+
 function AskWidget() {
   const [query, setQuery] = useState('')
   const [log, setLog] = useState([])
@@ -60,47 +96,51 @@ function AskWidget() {
   }
 
   return (
-    <section className={styles.section} id="pregunta">
-      <h2 className={styles.sectionTitle}>Pregúntame algo</h2>
-      <p className={styles.askHint}>
-        Respuestas automáticas generadas a partir de los datos de esta página — reglas simples, no un modelo de IA real (por ahora).
-      </p>
+    <section className={styles.band} id="pregunta">
+      <div className={styles.container}>
+        <Reveal>
+          <SectionHeading kicker="Charla rápida" title="Pregúntame algo" />
+          <p className={styles.askHint}>
+            Respuestas automáticas generadas a partir de los datos de esta página — reglas simples, no un modelo de IA real (por ahora).
+          </p>
 
-      <div className={styles.askChips}>
-        {suggestions.map((s) => (
-          <button key={s} className={styles.askChip} onClick={() => ask(s)}>
-            {s}
-          </button>
-        ))}
-      </div>
+          <div className={styles.askChips}>
+            {suggestions.map((s) => (
+              <button key={s} className={styles.askChip} onClick={() => ask(s)}>
+                {s}
+              </button>
+            ))}
+          </div>
 
-      <form
-        className={styles.askForm}
-        onSubmit={(e) => {
-          e.preventDefault()
-          ask(query)
-        }}
-      >
-        <input
-          className={styles.askInput}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Escribe tu pregunta..."
-          aria-label="Escribe tu pregunta"
-        />
-        <button type="submit" className={styles.askSubmit}>Preguntar</button>
-      </form>
+          <form
+            className={styles.askForm}
+            onSubmit={(e) => {
+              e.preventDefault()
+              ask(query)
+            }}
+          >
+            <input
+              className={styles.askInput}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Escribe tu pregunta..."
+              aria-label="Escribe tu pregunta"
+            />
+            <button type="submit" className={styles.askSubmit}>Preguntar</button>
+          </form>
 
-      {log.length > 0 && (
-        <div className={styles.askLog}>
-          {log.map((item, i) => (
-            <div key={i} className={styles.askItem}>
-              <p className={styles.askQ}>{item.question}</p>
-              <p className={styles.askA}>{item.answer}</p>
+          {log.length > 0 && (
+            <div className={styles.askLog}>
+              {log.map((item, i) => (
+                <div key={i} className={styles.askItem}>
+                  <p className={styles.askQ}>{item.question}</p>
+                  <p className={styles.askA}>{item.answer}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
+        </Reveal>
+      </div>
     </section>
   )
 }
@@ -151,6 +191,7 @@ function CvCapture({ visible, onDone }) {
 
 export default function Home() {
   const [cvClicked, setCvClicked] = useState(false)
+  const heroChips = [skills[0].items[0], skills[1].items[0], skills[3].items[0], 'Claude Code']
 
   function handleCvClick() {
     notifyCvDownload()
@@ -203,211 +244,251 @@ export default function Home() {
 
       <div className={styles.page}>
         <nav className={styles.nav}>
-          <span className={styles.navName}>JS</span>
-          <div className={styles.navLinks}>
-            <a href="#proyectos">Proyectos</a>
-            <a href="#experiencia">Experiencia</a>
-            <a href="#pregunta">Pregúntame</a>
-            <a href="#contacto">Contacto</a>
-            <ThemeToggle />
+          <div className={styles.navInner}>
+            <span className={styles.navName}>JS</span>
+            <div className={styles.navLinks}>
+              <a href="#proyectos">Proyectos</a>
+              <a href="#experiencia">Experiencia</a>
+              <a href="#pregunta">Pregúntame</a>
+              <a href="#contacto">Contacto</a>
+              <ThemeToggle />
+            </div>
           </div>
         </nav>
 
         <main className={styles.main}>
 
           {/* HERO */}
-          <section className={styles.hero}>
+          <section className={styles.band + ' ' + styles.hero}>
             <div className={styles.heroGrid} aria-hidden="true" />
+            <div className={styles.container}>
+              <div className={styles.heroContent}>
+                <div className={styles.heroGridLayout}>
+                  <div>
+                    <div className={styles.heroEyebrow}>
+                      <span className={styles.eyebrowDot} />
+                      Portfolio personal · Datos &amp; BI
+                    </div>
+                    <h1 className={styles.heroName}>{profile.name}</h1>
+                    <p className={styles.heroRole}>{profile.role}</p>
+                    <p className={styles.heroBio}>{profile.bio}</p>
+                    <div className={styles.heroActions}>
+                      <a href="#contacto" className={styles.btnPrimary}>Contactar</a>
+                      <a
+                        href={cvUrl}
+                        download={cvFilename}
+                        data-goatcounter-click="cv-download"
+                        onClick={handleCvClick}
+                        className={styles.btnSecondary}
+                      >
+                        Descargar CV
+                      </a>
+                      <a
+                        href={`https://github.com/${profile.github}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.btnSecondary}
+                      >
+                        GitHub
+                      </a>
+                    </div>
+                    <CvCapture visible={cvClicked} onDone={() => setCvClicked(false)} />
+                  </div>
 
-            <div className={styles.heroContent}>
-              <div className={styles.avatarRing}>
-                <img src="/avatar.jpg" alt={profile.name} width="72" height="72" className={styles.avatar} />
-              </div>
-              {profile.available && (
-                <div className={styles.heroStatus}>
-                  <span className={styles.dot} />
-                  Disponible para proyectos
+                  <div className={styles.heroVisual}>
+                    <div className={styles.heroGlow} aria-hidden="true" />
+                    <div className={styles.avatarRing}>
+                      <img src="/avatar.jpg" alt={profile.name} width="150" height="150" className={styles.avatar} />
+                    </div>
+                    <span className={`${styles.skillChip} ${styles.chip1}`}><span />{heroChips[0]}</span>
+                    <span className={`${styles.skillChip} ${styles.chip2}`}><span />{heroChips[1]}</span>
+                    <span className={`${styles.skillChip} ${styles.chip3}`}><span />{heroChips[2]}</span>
+                    <span className={`${styles.skillChip} ${styles.chip4}`}><span />{heroChips[3]}</span>
+                  </div>
                 </div>
-              )}
-              <h1 className={styles.heroName}>{profile.name}</h1>
-              <p className={styles.heroRole}>{profile.role}</p>
-              <p className={styles.heroBio}>{profile.bio}</p>
-              <div className={styles.heroActions}>
-                <a href="#contacto" className={styles.btnPrimary}>Contactar</a>
+              </div>
+            </div>
+          </section>
+
+          {/* IMPACTO */}
+          <section className={styles.band + ' ' + styles.statsSection}>
+            <div className={styles.container}>
+              <Reveal>
+                <h2 className={styles.srOnly}>Impacto</h2>
+                <div className={styles.terminal}>
+                  <div className={styles.terminalBar}>
+                    <span className={styles.terminalDot} style={{ background: '#f87171' }} />
+                    <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
+                    <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
+                  </div>
+                  <div className={styles.terminalBody}>
+                    <div className={styles.terminalQuery}>
+                      <span className={styles.terminalKw}>SELECT</span> impacto{' '}
+                      <span className={styles.terminalKw}>FROM</span> jorge{' '}
+                      <span className={styles.terminalKw}>WHERE</span> año {'>='} <span className={styles.terminalStr}>2022</span>;
+                    </div>
+                    {stats.map((s) => (
+                      <div key={s.key} className={styles.terminalRow}>
+                        <span className={styles.terminalField}>{s.key}</span>
+                        <span className={styles.terminalValue}>{s.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <p className={styles.statsCaption}>
+                  {stats.map((s) => s.label).join(' · ')}
+                </p>
+              </Reveal>
+            </div>
+          </section>
+
+          {/* SKILLS */}
+          <section className={styles.band + ' ' + styles.section}>
+            <div className={styles.container}>
+              <Reveal>
+                <SectionHeading kicker="Stack" title="Tecnologías" />
+                <div className={styles.skillsGrid}>
+                  {skills.map((group) => (
+                    <div key={group.group} className={styles.skillGroup}>
+                      <p className={styles.skillGroupName}>{group.group}</p>
+                      <div className={styles.skillTags}>
+                        {group.items.map((item) => (
+                          <span key={item} className={styles.tag}>{item}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
+            </div>
+          </section>
+
+          {/* CÓMO TRABAJO */}
+          <section className={styles.band + ' ' + styles.tint + ' ' + styles.section}>
+            <div className={styles.container}>
+              <Reveal>
+                <SectionHeading kicker="Metodología" title="Cómo trabajo" />
+                <div className={styles.methodList}>
+                  {methodology.map((step, i) => (
+                    <div key={step.title} className={styles.methodItem}>
+                      <span className={styles.methodNumber}>{String(i + 1).padStart(2, '0')}</span>
+                      <div>
+                        <p className={styles.methodTitle}>{step.title}</p>
+                        <p className={styles.methodDesc}>{step.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
+            </div>
+          </section>
+
+          {/* PROYECTOS */}
+          <section className={styles.band + ' ' + styles.section} id="proyectos">
+            <div className={styles.container}>
+              <Reveal>
+                <SectionHeading kicker="Portfolio" title="Proyectos" />
+                <div className={styles.projectList}>
+                  {projects.map((p, i) => (
+                    <div key={i} className={styles.project}>
+                      <span className={styles.projectNumber}>{String(i + 1).padStart(2, '0')}</span>
+                      <div className={styles.projectBody}>
+                        <div className={styles.projectHeader}>
+                          <span className={styles.projectName}>{p.name}</span>
+                          <span className={styles.projectStatus}>{p.status}</span>
+                        </div>
+                        <p className={styles.projectDesc}>{p.description}</p>
+                        <div className={styles.projectTech}>
+                          {p.tech.map((t) => (
+                            <span key={t} className={styles.techTag}>{t}</span>
+                          ))}
+                        </div>
+                        {(p.problem || p.approach) && (
+                          <details className={styles.projectDetails}>
+                            <summary>Más detalle</summary>
+                            {p.problem && (
+                              <div className={styles.projectDetailBlock}>
+                                <span className={styles.projectDetailLabel}>Problema</span>
+                                <p>{p.problem}</p>
+                              </div>
+                            )}
+                            {p.approach && (
+                              <div className={styles.projectDetailBlock}>
+                                <span className={styles.projectDetailLabel}>Enfoque</span>
+                                <p>{p.approach}</p>
+                              </div>
+                            )}
+                          </details>
+                        )}
+                        {p.url && (
+                          <a href={p.url} target="_blank" rel="noopener noreferrer" className={styles.projectLink}>
+                            Ver proyecto →
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
+            </div>
+          </section>
+
+          {/* EXPERIENCIA */}
+          <section className={styles.band + ' ' + styles.tint + ' ' + styles.section} id="experiencia">
+            <div className={styles.container}>
+              <Reveal>
+                <SectionHeading kicker="Trayectoria" title="Experiencia" />
+                <div className={styles.expList}>
+                  {experience.map((e, i) => (
+                    <div key={i} className={styles.expItem}>
+                      <div className={styles.expMeta}>
+                        <span className={styles.expPeriod}>{e.period}</span>
+                      </div>
+                      <div className={styles.expContent}>
+                        <p className={styles.expRole}>{e.role}</p>
+                        <p className={styles.expCompany}>{e.company}</p>
+                        <p className={styles.expDesc}>{e.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 <a
                   href={cvUrl}
                   download={cvFilename}
                   data-goatcounter-click="cv-download"
                   onClick={handleCvClick}
-                  className={styles.btnSecondary}
+                  className={styles.projectLink}
                 >
-                  Descargar CV
+                  Ver historial completo en el CV →
                 </a>
-                <a
-                  href={`https://github.com/${profile.github}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.btnSecondary}
-                >
-                  GitHub
-                </a>
-              </div>
-              <CvCapture visible={cvClicked} onDone={() => setCvClicked(false)} />
+              </Reveal>
             </div>
-          </section>
-
-          {/* IMPACTO */}
-          <section className={styles.statsSection}>
-            <h2 className={styles.srOnly}>Impacto</h2>
-            <div className={styles.terminal}>
-              <div className={styles.terminalBar}>
-                <span className={styles.terminalDot} style={{ background: '#f87171' }} />
-                <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
-                <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
-              </div>
-              <div className={styles.terminalBody}>
-                <div className={styles.terminalQuery}>
-                  <span className={styles.terminalKw}>SELECT</span> impacto{' '}
-                  <span className={styles.terminalKw}>FROM</span> jorge{' '}
-                  <span className={styles.terminalKw}>WHERE</span> año {'>='} <span className={styles.terminalStr}>2022</span>;
-                </div>
-                {stats.map((s) => (
-                  <div key={s.key} className={styles.terminalRow}>
-                    <span className={styles.terminalField}>{s.key}</span>
-                    <span className={styles.terminalValue}>{s.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <p className={styles.statsCaption}>
-              {stats.map((s) => s.label).join(' · ')}
-            </p>
-          </section>
-
-          {/* SKILLS */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Tecnologías</h2>
-            <div className={styles.skillsGrid}>
-              {skills.map((group) => (
-                <div key={group.group} className={styles.skillGroup}>
-                  <p className={styles.skillGroupName}>{group.group}</p>
-                  <div className={styles.skillTags}>
-                    {group.items.map((item) => (
-                      <span key={item} className={styles.tag}>{item}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* CÓMO TRABAJO */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Cómo trabajo</h2>
-            <div className={styles.methodList}>
-              {methodology.map((step, i) => (
-                <div key={step.title} className={styles.methodItem}>
-                  <span className={styles.methodNumber}>{String(i + 1).padStart(2, '0')}</span>
-                  <div>
-                    <p className={styles.methodTitle}>{step.title}</p>
-                    <p className={styles.methodDesc}>{step.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* PROYECTOS */}
-          <section className={styles.section} id="proyectos">
-            <h2 className={styles.sectionTitle}>Proyectos</h2>
-            <div className={styles.projectList}>
-              {projects.map((p, i) => (
-                <div key={i} className={styles.project}>
-                  <div className={styles.projectHeader}>
-                    <span className={styles.projectName}>{p.name}</span>
-                    <span className={styles.projectStatus}>{p.status}</span>
-                  </div>
-                  <p className={styles.projectDesc}>{p.description}</p>
-                  <div className={styles.projectTech}>
-                    {p.tech.map((t) => (
-                      <span key={t} className={styles.techTag}>{t}</span>
-                    ))}
-                  </div>
-                  {(p.problem || p.approach) && (
-                    <details className={styles.projectDetails}>
-                      <summary>Más detalle</summary>
-                      {p.problem && (
-                        <div className={styles.projectDetailBlock}>
-                          <span className={styles.projectDetailLabel}>Problema</span>
-                          <p>{p.problem}</p>
-                        </div>
-                      )}
-                      {p.approach && (
-                        <div className={styles.projectDetailBlock}>
-                          <span className={styles.projectDetailLabel}>Enfoque</span>
-                          <p>{p.approach}</p>
-                        </div>
-                      )}
-                    </details>
-                  )}
-                  {p.url && (
-                    <a href={p.url} target="_blank" rel="noopener noreferrer" className={styles.projectLink}>
-                      Ver proyecto →
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* EXPERIENCIA */}
-          <section className={styles.section} id="experiencia">
-            <h2 className={styles.sectionTitle}>Experiencia</h2>
-            <div className={styles.expList}>
-              {experience.map((e, i) => (
-                <div key={i} className={styles.expItem}>
-                  <div className={styles.expMeta}>
-                    <span className={styles.expPeriod}>{e.period}</span>
-                  </div>
-                  <div className={styles.expContent}>
-                    <p className={styles.expRole}>{e.role}</p>
-                    <p className={styles.expCompany}>{e.company}</p>
-                    <p className={styles.expDesc}>{e.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <a
-              href={cvUrl}
-              download={cvFilename}
-              data-goatcounter-click="cv-download"
-              onClick={handleCvClick}
-              className={styles.projectLink}
-            >
-              Ver historial completo en el CV →
-            </a>
           </section>
 
           <AskWidget />
 
           {/* CONTACTO */}
-          <section className={styles.contactSection} id="contacto">
-            <h2 className={styles.contactTitle}>¿Hablamos?</h2>
-            <p className={styles.contactSub}>
-              Abierto a colaboraciones, proyectos de datos o simplemente intercambiar ideas.
-            </p>
-            <a href={`mailto:${profile.email}`} className={styles.contactEmail}>
-              {profile.email}
-            </a>
-            <div className={styles.contactLinks}>
-              <a
-                href={`https://github.com/${profile.github}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.contactLinkItem}
-              >
-                GitHub
-              </a>
+          <section className={`${styles.band} ${styles.contactSection} ${styles.dark}`} id="contacto">
+            <div className={styles.container}>
+              <Reveal>
+                <h2 className={styles.contactTitle}>¿Hablamos?</h2>
+                <p className={styles.contactSub}>
+                  Abierto a colaboraciones, proyectos de datos o simplemente intercambiar ideas.
+                </p>
+                <a href={`mailto:${profile.email}`} className={styles.contactEmail}>
+                  {profile.email}
+                </a>
+                <div className={styles.contactLinks}>
+                  <a
+                    href={`https://github.com/${profile.github}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.contactLinkItem}
+                  >
+                    GitHub
+                  </a>
+                </div>
+              </Reveal>
             </div>
           </section>
 
