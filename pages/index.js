@@ -578,7 +578,15 @@ export default function Home() {
                             {e.approach && (
                               <div className={styles.projectDetailBlock}>
                                 <span className={styles.projectDetailLabel}>Qué hice</span>
-                                <p>{e.approach}</p>
+                                {Array.isArray(e.approach) ? (
+                                  <ul className={styles.detailList}>
+                                    {e.approach.map((line) => (
+                                      <li key={line}>{line}</li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p>{e.approach}</p>
+                                )}
                               </div>
                             )}
                             {e.impact && (
