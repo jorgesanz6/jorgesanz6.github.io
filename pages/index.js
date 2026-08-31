@@ -218,10 +218,6 @@ export default function Home() {
           {/* HERO */}
           <section className={styles.hero}>
             <div className={styles.heroGrid} aria-hidden="true" />
-            <svg className={styles.heroChart} viewBox="0 0 320 160" aria-hidden="true">
-              <path className={styles.sparkline1} d="M0 120 L40 90 L80 105 L120 55 L160 70 L200 30 L240 45 L280 15 L320 25" />
-              <path className={styles.sparkline2} d="M0 145 L40 140 L80 130 L120 135 L160 110 L200 118 L240 95 L280 100 L320 80" />
-            </svg>
 
             <div className={styles.heroContent}>
               <div className={styles.avatarRing}>
