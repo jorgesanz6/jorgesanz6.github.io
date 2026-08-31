@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
-import { profile, skills, projects, experience } from '../lib/data'
+import { profile, skills, projects, experience, cvUrl } from '../lib/data'
 import { getAnswer, suggestions } from '../lib/faq'
 import styles from '../styles/Home.module.css'
 
@@ -113,6 +113,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="canonical" href="https://jorgesanz6.github.io/" />
 
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://jorgesanz6.github.io/" />
@@ -125,6 +126,27 @@ export default function Home() {
         <meta name="twitter:title" content={profile.name} />
         <meta name="twitter:description" content={profile.bio} />
         <meta name="twitter:image" content="https://jorgesanz6.github.io/og-image.png" />
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Person',
+              name: profile.name,
+              jobTitle: profile.role,
+              description: profile.bio,
+              url: 'https://jorgesanz6.github.io/',
+              image: 'https://jorgesanz6.github.io/avatar.jpg',
+              email: `mailto:${profile.email}`,
+              address: {
+                '@type': 'PostalAddress',
+                addressLocality: profile.location,
+              },
+              sameAs: [`https://github.com/${profile.github}`],
+            }),
+          }}
+        />
       </Head>
 
       <div className={styles.page}>
@@ -144,7 +166,7 @@ export default function Home() {
           {/* HERO */}
           <section className={styles.hero}>
             <div className={styles.avatarRing}>
-              <img src="/avatar.jpg" alt={profile.name} className={styles.avatar} />
+              <img src="/avatar.jpg" alt={profile.name} width="72" height="72" className={styles.avatar} />
             </div>
             {profile.available && (
               <div className={styles.heroStatus}>
@@ -157,6 +179,14 @@ export default function Home() {
             <p className={styles.heroBio}>{profile.bio}</p>
             <div className={styles.heroActions}>
               <a href="#contacto" className={styles.btnPrimary}>Contactar</a>
+              <a
+                href={cvUrl}
+                download
+                data-goatcounter-click="cv-download"
+                className={styles.btnSecondary}
+              >
+                Descargar CV
+              </a>
               <a
                 href={`https://github.com/${profile.github}`}
                 target="_blank"
@@ -245,6 +275,14 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            <a
+              href={cvUrl}
+              download
+              data-goatcounter-click="cv-download"
+              className={styles.projectLink}
+            >
+              Ver historial completo en el CV →
+            </a>
           </section>
 
           <AskWidget />
@@ -266,6 +304,12 @@ export default function Home() {
                 className={styles.contactLinkItem}
               >
                 GitHub
+              </a>
+              <a
+                href={`mailto:${profile.email}?subject=${encodeURIComponent('Avísame cuando actualices el CV')}&body=${encodeURIComponent('Hola Jorge, avísame cuando publiques una versión nueva del CV.')}`}
+                className={styles.contactLinkItem}
+              >
+                Avísame si actualizas el CV
               </a>
             </div>
           </section>

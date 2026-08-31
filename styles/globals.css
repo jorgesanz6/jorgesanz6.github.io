@@ -9,6 +9,7 @@
   --text-muted: #64748B;
   --accent: #2563EB;
   --accent-light: #EFF6FF;
+  --accent-btn: #2563EB;
   --border: #E2E8F0;
   --nav-bg: rgba(248, 249, 250, 0.92);
   --font: 'Inter', system-ui, sans-serif;
@@ -23,6 +24,7 @@
     --text-muted: #94A3B8;
     --accent: #3B82F6;
     --accent-light: rgba(59, 130, 246, 0.15);
+    --accent-btn: #2563EB;
     --border: #1E293B;
     --nav-bg: rgba(11, 17, 32, 0.85);
   }
