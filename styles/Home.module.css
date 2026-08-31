@@ -786,9 +786,21 @@
 .projectLink {
   display: inline-block;
   margin-top: 0.75rem;
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
   font-size: 0.85rem;
   color: var(--accent);
   font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.projectLink:hover,
+.projectLink:focus-visible {
+  text-decoration: underline;
+  transform: translateX(2px);
 }
 
 /* PROJECT COVER */
