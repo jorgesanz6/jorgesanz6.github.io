@@ -453,6 +453,7 @@
 
 .terminalRow {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
   gap: 1.5rem;
   white-space: nowrap;
@@ -464,7 +465,9 @@
 
 .terminalValue {
   color: #4ade80;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1.3em;
+  line-height: 1;
 }
 
 .terminalCursor {
