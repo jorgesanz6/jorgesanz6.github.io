@@ -1,6 +1,50 @@
 import Head from 'next/head'
+import { useEffect, useState } from 'react'
 import { profile, skills, projects, experience } from '../lib/data'
 import styles from '../styles/Home.module.css'
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState(null)
+
+  useEffect(() => {
+    const stored = document.documentElement.getAttribute('data-theme')
+    if (stored) {
+      setTheme(stored)
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      setTheme(prefersDark ? 'dark' : 'light')
+    }
+  }, [])
+
+  function toggle() {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    document.documentElement.setAttribute('data-theme', next)
+    localStorage.setItem('theme', next)
+  }
+
+  if (!theme) return <button className={styles.themeToggle} aria-hidden="true" />
+
+  return (
+    <button
+      className={styles.themeToggle}
+      onClick={toggle}
+      aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+      title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+    >
+      {theme === 'dark' ? (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+        </svg>
+      )}
+    </button>
+  )
+}
 
 export default function Home() {
   return (
@@ -9,7 +53,20 @@ export default function Home() {
         <title>{profile.name}</title>
         <meta name="description" content={profile.bio} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://jorgesanz6.github.io/" />
+        <meta property="og:title" content={profile.name} />
+        <meta property="og:description" content={profile.bio} />
+        <meta property="og:image" content="https://jorgesanz6.github.io/og-image.png" />
+        <meta property="og:locale" content="es_ES" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={profile.name} />
+        <meta name="twitter:description" content={profile.bio} />
+        <meta name="twitter:image" content="https://jorgesanz6.github.io/og-image.png" />
       </Head>
 
       <div className={styles.page}>
@@ -19,6 +76,7 @@ export default function Home() {
             <a href="#proyectos">Proyectos</a>
             <a href="#experiencia">Experiencia</a>
             <a href="#contacto">Contacto</a>
+            <ThemeToggle />
           </div>
         </nav>
 
@@ -26,10 +84,13 @@ export default function Home() {
 
           {/* HERO */}
           <section className={styles.hero}>
-            <div className={styles.heroStatus}>
-              <span className={styles.dot} />
-              Disponible para proyectos
-            </div>
+            <div className={styles.avatar}>JS</div>
+            {profile.available && (
+              <div className={styles.heroStatus}>
+                <span className={styles.dot} />
+                Disponible para proyectos
+              </div>
+            )}
             <h1 className={styles.heroName}>{profile.name}</h1>
             <p className={styles.heroRole}>{profile.role}</p>
             <p className={styles.heroBio}>{profile.bio}</p>

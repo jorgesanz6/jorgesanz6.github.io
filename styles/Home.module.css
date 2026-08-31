@@ -9,7 +9,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(248, 249, 250, 0.92);
+  background: var(--nav-bg);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
   padding: 0 2rem;
@@ -29,6 +29,7 @@
 
 .navLinks {
   display: flex;
+  align-items: center;
   gap: 2rem;
 }
 
@@ -40,6 +41,31 @@
 
 .navLinks a:hover {
   color: var(--text);
+}
+
+.themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.themeToggle:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.themeToggle svg {
+  width: 15px;
+  height: 15px;
 }
 
 /* MAIN */
@@ -55,6 +81,22 @@
 .hero {
   padding: 5rem 0 4rem;
   border-bottom: 1px solid var(--border);
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(155deg, var(--accent) 0%, #1d4ed8 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.25rem;
+  object-fit: cover;
 }
 
 .heroStatus {
