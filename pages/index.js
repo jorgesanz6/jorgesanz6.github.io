@@ -160,13 +160,13 @@ function TerminalStats({ stats }) {
 
   useEffect(() => {
     if (!active || typed >= QUERY_TEXT.length) return
-    const t = setTimeout(() => setTyped((n) => n + 1), 18)
+    const t = setTimeout(() => setTyped((n) => n + 1), 55)
     return () => clearTimeout(t)
   }, [active, typed])
 
   useEffect(() => {
     if (typed < QUERY_TEXT.length || rowsShown >= stats.length) return
-    const t = setTimeout(() => setRowsShown((n) => n + 1), 160)
+    const t = setTimeout(() => setRowsShown((n) => n + 1), 280)
     return () => clearTimeout(t)
   }, [typed, rowsShown, stats.length])
 
@@ -327,7 +327,13 @@ function CvCapture({ visible, onDone }) {
 
 export default function Home() {
   const [cvClicked, setCvClicked] = useState(false)
-  const heroChips = [skills[0].items[0], skills[1].items[0], skills[3].items[0], 'Claude Code']
+  const skillByGroup = (group) => skills.find((s) => s.group === group)?.items[0]
+  const heroChips = [
+    skillByGroup('Business Intelligence'),
+    skillByGroup('Bases de datos'),
+    skillByGroup('Desarrollo web'),
+    'Claude Code',
+  ]
 
   function handleCvClick() {
     notifyCvDownload()
