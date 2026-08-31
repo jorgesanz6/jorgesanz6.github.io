@@ -363,6 +363,35 @@ function ProjectModal({ project, onClose }) {
           aria-label={`${project.name} — captura ampliada`}
         >
           <img src={images[imgIndex]} alt={`${project.name} — captura ${imgIndex + 1}`} />
+          {images.length > 1 && (
+            <button
+              type="button"
+              className={`${styles.modalNav} ${styles.modalNavPrev}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                setImgIndex((i) => (i - 1 + images.length) % images.length)
+              }}
+              aria-label="Captura anterior"
+            >
+              ‹
+            </button>
+          )}
+          {images.length > 1 && (
+            <button
+              type="button"
+              className={`${styles.modalNav} ${styles.modalNavNext}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                setImgIndex((i) => (i + 1) % images.length)
+              }}
+              aria-label="Captura siguiente"
+            >
+              ›
+            </button>
+          )}
+          {images.length > 1 && (
+            <span className={styles.modalCounter}>{imgIndex + 1} / {images.length}</span>
+          )}
           <button
             type="button"
             className={styles.modalClose}
