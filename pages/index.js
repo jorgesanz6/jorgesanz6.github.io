@@ -262,6 +262,7 @@ function ProjectDetailBody({ project }) {
 function ProjectModal({ project, onClose }) {
   const [imgIndex, setImgIndex] = useState(0)
   const [mounted, setMounted] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
   const images = project.images || []
 
   useEffect(() => {
@@ -274,13 +275,16 @@ function ProjectModal({ project, onClose }) {
 
   useEffect(() => {
     function onKey(e) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        if (fullscreen) setFullscreen(false)
+        else onClose()
+      }
       if (e.key === 'ArrowRight') setImgIndex((i) => Math.min(i + 1, images.length - 1))
       if (e.key === 'ArrowLeft') setImgIndex((i) => Math.max(i - 1, 0))
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [images.length, onClose])
+  }, [images.length, onClose, fullscreen])
 
   if (!mounted) return null
 
@@ -307,7 +311,12 @@ function ProjectModal({ project, onClose }) {
                   ‹
                 </button>
               )}
-              <img src={images[imgIndex]} alt={`${project.name} — captura ${imgIndex + 1}`} />
+              <img
+                src={images[imgIndex]}
+                alt={`${project.name} — captura ${imgIndex + 1}`}
+                onClick={() => setFullscreen(true)}
+                className={styles.zoomable}
+              />
               {images.length > 1 && (
                 <button
                   type="button"
@@ -344,6 +353,29 @@ function ProjectModal({ project, onClose }) {
           <ProjectDetailBody project={project} />
         </div>
       </div>
+
+      {fullscreen && images.length > 0 && (
+        <div
+          className={styles.imageFullscreen}
+          onClick={() => setFullscreen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${project.name} — captura ampliada`}
+        >
+          <img src={images[imgIndex]} alt={`${project.name} — captura ${imgIndex + 1}`} />
+          <button
+            type="button"
+            className={styles.modalClose}
+            onClick={(e) => {
+              e.stopPropagation()
+              setFullscreen(false)
+            }}
+            aria-label="Cerrar pantalla completa"
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>,
     document.body
   )
