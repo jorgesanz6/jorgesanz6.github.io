@@ -220,6 +220,51 @@ function SectionHeading({ kicker, title }) {
   )
 }
 
+function ProjectGallery({ images, name }) {
+  const [open, setOpen] = useState(null)
+
+  useEffect(() => {
+    if (open === null) return
+    function onKey(e) {
+      if (e.key === 'Escape') setOpen(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
+  return (
+    <>
+      <div className={styles.gallery}>
+        {images.map((src, i) => (
+          <button
+            key={src}
+            type="button"
+            className={styles.galleryThumb}
+            onClick={() => setOpen(i)}
+            aria-label={`Ampliar captura ${i + 1} de ${name}`}
+          >
+            <img src={src} alt={`${name} — captura ${i + 1}`} loading="lazy" />
+          </button>
+        ))}
+      </div>
+
+      {open !== null && (
+        <div className={styles.lightbox} onClick={() => setOpen(null)} role="dialog" aria-modal="true">
+          <img
+            src={images[open]}
+            alt={`${name} — captura ${open + 1}`}
+            className={styles.lightboxImg}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button type="button" className={styles.lightboxClose} onClick={() => setOpen(null)} aria-label="Cerrar">
+            ×
+          </button>
+        </div>
+      )}
+    </>
+  )
+}
+
 function AskWidget() {
   const [query, setQuery] = useState('')
   const [log, setLog] = useState([])
@@ -527,6 +572,7 @@ export default function Home() {
                             <span key={t} className={styles.techTag}>{t}</span>
                           ))}
                         </div>
+                        {p.images && <ProjectGallery images={p.images} name={p.name} />}
                         {(p.problem || p.approach) && (
                           <details className={styles.projectDetails}>
                             <summary>Más detalle</summary>
@@ -539,7 +585,15 @@ export default function Home() {
                             {p.approach && (
                               <div className={styles.projectDetailBlock}>
                                 <span className={styles.projectDetailLabel}>Enfoque</span>
-                                <p>{p.approach}</p>
+                                {Array.isArray(p.approach) ? (
+                                  <ul className={styles.detailList}>
+                                    {p.approach.map((line) => (
+                                      <li key={line}>{line}</li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p>{p.approach}</p>
+                                )}
                               </div>
                             )}
                           </details>
