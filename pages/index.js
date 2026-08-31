@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
-import { profile, skills, projects, experience, cvUrl, cvFilename } from '../lib/data'
+import { profile, skills, projects, experience, cvUrl, cvFilename, stats, methodology } from '../lib/data'
 import { getAnswer, suggestions } from '../lib/faq'
 import { notifyCvDownload, notifyCvEmailOptIn } from '../lib/notify'
 import styles from '../styles/Home.module.css'
@@ -217,39 +217,59 @@ export default function Home() {
 
           {/* HERO */}
           <section className={styles.hero}>
-            <div className={styles.avatarRing}>
-              <img src="/avatar.jpg" alt={profile.name} width="72" height="72" className={styles.avatar} />
-            </div>
-            {profile.available && (
-              <div className={styles.heroStatus}>
-                <span className={styles.dot} />
-                Disponible para proyectos
+            <div className={styles.heroGrid} aria-hidden="true" />
+            <svg className={styles.heroChart} viewBox="0 0 320 160" aria-hidden="true">
+              <path className={styles.sparkline1} d="M0 120 L40 90 L80 105 L120 55 L160 70 L200 30 L240 45 L280 15 L320 25" />
+              <path className={styles.sparkline2} d="M0 145 L40 140 L80 130 L120 135 L160 110 L200 118 L240 95 L280 100 L320 80" />
+            </svg>
+
+            <div className={styles.heroContent}>
+              <div className={styles.avatarRing}>
+                <img src="/avatar.jpg" alt={profile.name} width="72" height="72" className={styles.avatar} />
               </div>
-            )}
-            <h1 className={styles.heroName}>{profile.name}</h1>
-            <p className={styles.heroRole}>{profile.role}</p>
-            <p className={styles.heroBio}>{profile.bio}</p>
-            <div className={styles.heroActions}>
-              <a href="#contacto" className={styles.btnPrimary}>Contactar</a>
-              <a
-                href={cvUrl}
-                download={cvFilename}
-                data-goatcounter-click="cv-download"
-                onClick={handleCvClick}
-                className={styles.btnSecondary}
-              >
-                Descargar CV
-              </a>
-              <a
-                href={`https://github.com/${profile.github}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.btnSecondary}
-              >
-                GitHub
-              </a>
+              {profile.available && (
+                <div className={styles.heroStatus}>
+                  <span className={styles.dot} />
+                  Disponible para proyectos
+                </div>
+              )}
+              <h1 className={styles.heroName}>{profile.name}</h1>
+              <p className={styles.heroRole}>{profile.role}</p>
+              <p className={styles.heroBio}>{profile.bio}</p>
+              <div className={styles.heroActions}>
+                <a href="#contacto" className={styles.btnPrimary}>Contactar</a>
+                <a
+                  href={cvUrl}
+                  download={cvFilename}
+                  data-goatcounter-click="cv-download"
+                  onClick={handleCvClick}
+                  className={styles.btnSecondary}
+                >
+                  Descargar CV
+                </a>
+                <a
+                  href={`https://github.com/${profile.github}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.btnSecondary}
+                >
+                  GitHub
+                </a>
+              </div>
+              <CvCapture visible={cvClicked} onDone={() => setCvClicked(false)} />
             </div>
-            <CvCapture visible={cvClicked} onDone={() => setCvClicked(false)} />
+          </section>
+
+          {/* IMPACTO */}
+          <section className={styles.statsSection}>
+            <div className={styles.statsGrid}>
+              {stats.map((s) => (
+                <div key={s.label} className={styles.statTile}>
+                  <span className={styles.statValue}>{s.value}</span>
+                  <span className={styles.statLabel}>{s.label}</span>
+                </div>
+              ))}
+            </div>
           </section>
 
           {/* SKILLS */}
@@ -263,6 +283,22 @@ export default function Home() {
                     {group.items.map((item) => (
                       <span key={item} className={styles.tag}>{item}</span>
                     ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* CÓMO TRABAJO */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Cómo trabajo</h2>
+            <div className={styles.methodList}>
+              {methodology.map((step, i) => (
+                <div key={step.title} className={styles.methodItem}>
+                  <span className={styles.methodNumber}>{String(i + 1).padStart(2, '0')}</span>
+                  <div>
+                    <p className={styles.methodTitle}>{step.title}</p>
+                    <p className={styles.methodDesc}>{step.description}</p>
                   </div>
                 </div>
               ))}
