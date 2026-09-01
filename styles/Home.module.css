@@ -65,6 +65,31 @@
   right: 0;
 }
 
+.themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.themeToggle:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.themeToggle svg {
+  width: 15px;
+  height: 15px;
+}
+
 /* MAIN / BANDS */
 .main {
   flex: 1;
