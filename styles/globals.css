@@ -1,52 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --base: #F8F9FA;
-  --surface: #FFFFFF;
-  --band-tint: #F1F0EC;
-  --text: #0F172A;
-  --text-muted: #64748B;
-  --accent: #2563EB;
-  --accent-2: #7C3AED;
-  --accent-light: #EFF6FF;
-  --accent-btn: #2563EB;
-  --border: #E2E8F0;
-  --nav-bg: rgba(248, 249, 250, 0.92);
-  --font: 'Inter', system-ui, sans-serif;
-  --font-heading: 'Space Grotesk', 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --base: #0A0E14;
+  --surface: #111722;
+  --band-tint: #0D131C;
+  --text: #D7DEE8;
+  --text-muted: #8894A3;
+  --accent: #5FE1A1;
+  --accent-2: #2E9165;
+  --accent-light: rgba(95, 225, 161, 0.12);
+  --accent-btn: #2E9165;
+  --accent-btn-hover: #256F4E;
+  --warn: #F2C94C;
+  --border: #1F2733;
+  --nav-bg: rgba(10, 14, 20, 0.85);
+  --font: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-heading: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   --max-w: 900px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --base: #0B1120;
-    --surface: #111827;
-    --band-tint: #0E1626;
-    --text: #E2E8F0;
-    --text-muted: #94A3B8;
-    --accent: #3B82F6;
-    --accent-2: #A78BFA;
-    --accent-light: rgba(59, 130, 246, 0.15);
-    --accent-btn: #2563EB;
-    --border: #1E293B;
-    --nav-bg: rgba(11, 17, 32, 0.85);
-  }
-}
-
-:root[data-theme="dark"] {
-  --base: #0B1120;
-  --surface: #111827;
-  --band-tint: #0E1626;
-  --text: #E2E8F0;
-  --text-muted: #94A3B8;
-  --accent: #3B82F6;
-  --accent-2: #A78BFA;
-  --accent-light: rgba(59, 130, 246, 0.15);
-  --border: #1E293B;
-  --nav-bg: rgba(11, 17, 32, 0.85);
 }
 
 html { font-size: 16px; scroll-behavior: smooth; }
@@ -58,7 +29,6 @@ body {
   font-weight: 400;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  transition: background 0.2s ease, color 0.2s ease;
 }
 
 a { color: inherit; text-decoration: none; }

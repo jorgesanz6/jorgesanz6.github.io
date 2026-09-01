@@ -1,53 +1,10 @@
 import Head from 'next/head'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { profile, skills, projects, experience, cvUrl, cvFilename, stats, methodology, methodologyIntro } from '../lib/data'
+import { profile, skills, projects, experience, cvUrl, cvFilename, stats, methodology, methodologyIntro, linkedinUrl } from '../lib/data'
 import { getAnswer, suggestions } from '../lib/faq'
 import { notifyCvDownload, notifyCvEmailOptIn } from '../lib/notify'
 import styles from '../styles/Home.module.css'
-
-function ThemeToggle() {
-  const [theme, setTheme] = useState(null)
-
-  useEffect(() => {
-    const stored = document.documentElement.getAttribute('data-theme')
-    if (stored) {
-      setTheme(stored)
-    } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      setTheme(prefersDark ? 'dark' : 'light')
-    }
-  }, [])
-
-  function toggle() {
-    const next = theme === 'dark' ? 'light' : 'dark'
-    setTheme(next)
-    document.documentElement.setAttribute('data-theme', next)
-    localStorage.setItem('theme', next)
-  }
-
-  if (!theme) return <button className={styles.themeToggle} aria-hidden="true" />
-
-  return (
-    <button
-      className={styles.themeToggle}
-      onClick={toggle}
-      aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
-      title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-    >
-      {theme === 'dark' ? (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-        </svg>
-      ) : (
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
-        </svg>
-      )}
-    </button>
-  )
-}
 
 function Reveal({ children, className }) {
   const ref = useRef(null)
@@ -252,7 +209,7 @@ function ProjectDetailBody({ project }) {
       )}
       {project.url && (
         <a href={project.url} target="_blank" rel="noopener noreferrer" className={styles.projectLink}>
-          Ver proyecto →
+          Ver proyecto
         </a>
       )}
     </>
@@ -418,7 +375,6 @@ function ProjectsSection({ projects: list }) {
       <div className={styles.projectList}>
         {list.map((p, i) => (
           <div key={i} className={styles.project}>
-            <span className={styles.projectNumber}>{String(i + 1).padStart(2, '0')}</span>
             <div className={styles.projectBody}>
               <div className={styles.projectHeader}>
                 <span className={styles.projectName}>{p.name}</span>
@@ -444,7 +400,7 @@ function ProjectsSection({ projects: list }) {
                 </button>
               )}
               <button type="button" className={styles.projectLink} onClick={() => setActiveIndex(i)}>
-                Ver detalle →
+                Ver detalle
               </button>
             </div>
           </div>
@@ -475,7 +431,7 @@ function AskWidget() {
         <Reveal>
           <SectionHeading kicker="Charla rápida" title="Pregúntame algo" />
           <p className={styles.askHint}>
-            Respuestas automáticas generadas a partir de los datos de esta página — reglas simples, no un modelo de IA real (por ahora).
+            Preguntas rápidas sobre mi trayectoria, mi stack o mis proyectos — respondidas al momento, sin que tengas que leer toda la página.
           </p>
 
           <div className={styles.askChips}>
@@ -565,14 +521,6 @@ function CvCapture({ visible, onDone }) {
 
 export default function Home() {
   const [cvClicked, setCvClicked] = useState(false)
-  const skillByGroup = (group) => skills.find((s) => s.group === group)?.items[0]
-  const heroChips = [
-    skillByGroup('Business Intelligence'),
-    skillByGroup('Bases de datos'),
-    skillByGroup('Desarrollo web'),
-    'Claude Code',
-  ]
-
   function handleCvClick() {
     notifyCvDownload()
     setCvClicked(true)
@@ -582,7 +530,10 @@ export default function Home() {
     <>
       <Head>
         <title>{profile.name}</title>
-        <meta name="description" content={profile.bio} />
+        <meta
+          name="description"
+          content="Jorge Sanz — Data Analyst & BI Consultant. Dashboards en Power BI, automatización de informes y aplicaciones propias construidas con Next.js e IA."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -591,13 +542,19 @@ export default function Home() {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://jorgesanz6.github.io/" />
         <meta property="og:title" content={profile.name} />
-        <meta property="og:description" content={profile.bio} />
+        <meta
+          property="og:description"
+          content="BI de día, producto por mi cuenta de noche: dashboards que optimizo un 60%, y dos apps propias que uso yo mismo cada día."
+        />
         <meta property="og:image" content="https://jorgesanz6.github.io/og-image.png" />
         <meta property="og:locale" content="es_ES" />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={profile.name} />
-        <meta name="twitter:description" content={profile.bio} />
+        <meta
+          name="twitter:description"
+          content="BI de día, producto por mi cuenta de noche: dashboards que optimizo un 60%, y dos apps propias que uso yo mismo cada día."
+        />
         <meta name="twitter:image" content="https://jorgesanz6.github.io/og-image.png" />
 
         <script
@@ -608,7 +565,7 @@ export default function Home() {
               '@type': 'Person',
               name: profile.name,
               jobTitle: profile.role,
-              description: profile.bio,
+              description: 'Analista de Business Intelligence especializado en Power BI, automatización de procesos y desarrollo de aplicaciones web.',
               url: 'https://jorgesanz6.github.io/',
               image: 'https://jorgesanz6.github.io/avatar.jpg',
               email: `mailto:${profile.email}`,
@@ -616,7 +573,7 @@ export default function Home() {
                 '@type': 'PostalAddress',
                 addressLocality: profile.location,
               },
-              sameAs: [`https://github.com/${profile.github}`],
+              sameAs: [`https://github.com/${profile.github}`, linkedinUrl],
             }),
           }}
         />
@@ -631,7 +588,6 @@ export default function Home() {
               <a href="#experiencia">Experiencia</a>
               <a href="#pregunta">Pregúntame</a>
               <a href="#contacto">Contacto</a>
-              <ThemeToggle />
             </div>
           </div>
         </nav>
@@ -643,105 +599,47 @@ export default function Home() {
             <div className={styles.heroGrid} aria-hidden="true" />
             <div className={styles.container}>
               <div className={styles.heroContent}>
-                <div className={styles.heroGridLayout}>
-                  <div>
-                    <div className={styles.heroEyebrow}>
-                      <span className={styles.eyebrowDot} />
-                      Portfolio personal · Datos &amp; BI
-                    </div>
+                <div className={styles.terminal}>
+                  <div className={styles.terminalBar}>
+                    <span className={styles.terminalDot} style={{ background: '#f87171' }} />
+                    <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
+                    <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
+                    <span className={styles.windowLabel}>jorgesanz6.github.io</span>
+                  </div>
+                  <div className={styles.windowPad}>
+                    <p className={styles.promptLine}><span className={styles.sign}>jorge@bi:~$</span>whoami</p>
                     <h1 className={styles.heroName}>{profile.name}</h1>
                     <p className={styles.heroRole}>{profile.role}</p>
-                    <p className={styles.heroBio}>{profile.bio}</p>
+                    <p className={styles.heroPos}>
+                      Reduzco la distancia entre una pregunta de negocio y la respuesta en un dashboard — y cuando la herramienta que necesito no existe, la construyo yo mismo.
+                    </p>
                     <div className={styles.heroActions}>
                       <a href="#contacto" className={styles.btnPrimary}>Contactar</a>
-                      <a
-                        href={cvUrl}
-                        download={cvFilename}
-                        data-goatcounter-click="cv-download"
-                        onClick={handleCvClick}
-                        className={styles.btnSecondary}
-                      >
-                        Descargar CV
+                      <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className={styles.contactLinkItem}>
+                        LinkedIn
                       </a>
                       <a
                         href={`https://github.com/${profile.github}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={styles.btnSecondary}
+                        className={styles.contactLinkItem}
                       >
                         GitHub
+                      </a>
+                      <a
+                        href={cvUrl}
+                        download={cvFilename}
+                        data-goatcounter-click="cv-download"
+                        onClick={handleCvClick}
+                        className={styles.contactLinkItem}
+                      >
+                        Descargar CV
                       </a>
                     </div>
                     <CvCapture visible={cvClicked} onDone={() => setCvClicked(false)} />
                   </div>
-
-                  <div className={styles.heroVisual}>
-                    <div className={styles.heroGlow} aria-hidden="true" />
-                    <div className={styles.avatarRing}>
-                      <img src="/avatar.jpg" alt={profile.name} width="150" height="150" className={styles.avatar} />
-                    </div>
-                    <span className={`${styles.skillChip} ${styles.chip1}`}><span />{heroChips[0]}</span>
-                    <span className={`${styles.skillChip} ${styles.chip2}`}><span />{heroChips[1]}</span>
-                    <span className={`${styles.skillChip} ${styles.chip3}`}><span />{heroChips[2]}</span>
-                    <span className={`${styles.skillChip} ${styles.chip4}`}><span />{heroChips[3]}</span>
-                  </div>
                 </div>
               </div>
-            </div>
-          </section>
-
-          {/* IMPACTO */}
-          <section className={styles.band + ' ' + styles.statsSection}>
-            <div className={styles.container}>
-              <Reveal>
-                <h2 className={styles.srOnly}>Impacto</h2>
-                <TerminalStats stats={stats} />
-                <p className={styles.statsCaption}>
-                  {stats.map((s) => s.label).join(' · ')}
-                </p>
-              </Reveal>
-            </div>
-          </section>
-
-          {/* SKILLS */}
-          <section className={styles.band + ' ' + styles.section}>
-            <div className={styles.container}>
-              <Reveal>
-                <SectionHeading kicker="Stack" title="Tecnologías" />
-                <div className={styles.skillsGrid}>
-                  {skills.map((group) => (
-                    <div key={group.group} className={styles.skillGroup}>
-                      <p className={styles.skillGroupName}>{group.group}</p>
-                      <div className={styles.skillTags}>
-                        {group.items.map((item) => (
-                          <span key={item} className={styles.tag}>{item}</span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Reveal>
-            </div>
-          </section>
-
-          {/* CÓMO TRABAJO */}
-          <section className={styles.band + ' ' + styles.tint + ' ' + styles.section}>
-            <div className={styles.container}>
-              <Reveal>
-                <SectionHeading kicker="Metodología" title="Cómo trabajo" />
-                <p className={styles.methodIntro}>{methodologyIntro}</p>
-                <div className={styles.methodList}>
-                  {methodology.map((step, i) => (
-                    <div key={step.title} className={styles.methodItem}>
-                      <span className={styles.methodNumber}>{METHOD_ICONS[i]}</span>
-                      <div>
-                        <p className={styles.methodTitle}>{step.title}</p>
-                        <p className={styles.methodDesc}>{step.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Reveal>
             </div>
           </section>
 
@@ -749,8 +647,18 @@ export default function Home() {
           <section className={styles.band + ' ' + styles.section} id="proyectos">
             <div className={styles.container}>
               <Reveal>
-                <SectionHeading kicker="Portfolio" title="Proyectos" />
-                <ProjectsSection projects={projects} />
+                <SectionHeading kicker="Lo que he construido" title="Proyectos" />
+                <div className={styles.terminal}>
+                  <div className={styles.terminalBar}>
+                    <span className={styles.terminalDot} style={{ background: '#f87171' }} />
+                    <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
+                    <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
+                  </div>
+                  <div className={styles.windowPad}>
+                    <p className={styles.promptLine}><span className={styles.sign}>jorge@bi:~$</span>ls proyectos/</p>
+                    <ProjectsSection projects={projects} />
+                  </div>
+                </div>
               </Reveal>
             </div>
           </section>
@@ -759,7 +667,11 @@ export default function Home() {
           <section className={styles.band + ' ' + styles.tint + ' ' + styles.section} id="experiencia">
             <div className={styles.container}>
               <Reveal>
-                <SectionHeading kicker="Trayectoria" title="Experiencia" />
+                <SectionHeading kicker="Cómo he llegado hasta aquí" title="Experiencia" />
+                <TerminalStats stats={stats} />
+                <p className={styles.statsCaption}>
+                  {stats.map((s) => s.label).join(' · ')}
+                </p>
                 <div className={styles.expList}>
                   {experience.map((e, i) => (
                     <div key={i} className={styles.expItem}>
@@ -812,8 +724,42 @@ export default function Home() {
                   onClick={handleCvClick}
                   className={styles.projectLink}
                 >
-                  Ver historial completo en el CV →
+                  Ver historial completo en el CV
                 </a>
+              </Reveal>
+            </div>
+          </section>
+
+          {/* CÓMO TRABAJO */}
+          <section className={styles.band + ' ' + styles.section}>
+            <div className={styles.container}>
+              <Reveal>
+                <SectionHeading kicker="Metodología" title="Cómo trabajo" />
+                <p className={styles.methodIntro}>{methodologyIntro}</p>
+                <div className={styles.methodList}>
+                  {methodology.map((step, i) => (
+                    <div key={step.title} className={styles.methodItem}>
+                      <span className={styles.methodNumber}>{METHOD_ICONS[i]}</span>
+                      <div>
+                        <p className={styles.methodTitle}>{step.title}</p>
+                        <p className={styles.methodDesc}>{step.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className={`${styles.sectionKicker} ${styles.subKicker}`}>Con qué trabajo</p>
+                <div className={styles.skillsGrid}>
+                  {skills.map((group) => (
+                    <div key={group.group} className={styles.skillGroup}>
+                      <p className={styles.skillGroupName}>{group.group}</p>
+                      <div className={styles.skillTags}>
+                        {group.items.map((item) => (
+                          <span key={item} className={styles.tag}>{item}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </Reveal>
             </div>
           </section>
@@ -821,7 +767,7 @@ export default function Home() {
           <AskWidget />
 
           {/* CONTACTO */}
-          <section className={`${styles.band} ${styles.contactSection} ${styles.dark}`} id="contacto">
+          <section className={`${styles.band} ${styles.contactSection}`} id="contacto">
             <div className={styles.container}>
               <Reveal>
                 <h2 className={styles.contactTitle}>¿Hablamos?</h2>
@@ -832,6 +778,9 @@ export default function Home() {
                   {profile.email}
                 </a>
                 <div className={styles.contactLinks}>
+                  <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className={styles.contactLinkItem}>
+                    LinkedIn
+                  </a>
                   <a
                     href={`https://github.com/${profile.github}`}
                     target="_blank"
