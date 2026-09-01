@@ -236,7 +236,6 @@ function GithubActivity() {
                     key={di}
                     className={styles.ghDay}
                     data-level={day ? day.level : -1}
-                    title={day ? `${day.count} contribuciones el ${day.date}` : undefined}
                   />
                 ))}
               </div>
