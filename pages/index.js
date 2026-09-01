@@ -212,7 +212,8 @@ function GithubActivity() {
       </div>
       <div className={styles.windowPad}>
         <p className={styles.promptLine}>
-          <span className={styles.sign}>jorge@bi:~$</span>git log --since=&quot;1 year ago&quot; --oneline | wc -l
+          <span className={styles.sign}>jorge@bi=#</span>
+          <span className={styles.terminalKw}>SELECT COUNT</span>(*) <span className={styles.terminalKw}>FROM </span>contribuciones <span className={styles.terminalKw}>WHERE </span>fecha &gt;= <span className={styles.terminalStr}>&apos;hace 1 año&apos;</span>;
         </p>
         <p className={styles.ghTotal}>{data.total?.lastYear ?? 0} contribuciones en el último año, en vivo desde GitHub</p>
         <div className={styles.ghGraph}>
@@ -694,7 +695,10 @@ export default function Home() {
                     <span className={styles.windowLabel}>jorgesanz6.github.io</span>
                   </div>
                   <div className={styles.windowPad}>
-                    <p className={styles.promptLine}><span className={styles.sign}>jorge@bi:~$</span>whoami</p>
+                    <p className={styles.promptLine}>
+                      <span className={styles.sign}>jorge@bi=#</span>
+                      <span className={styles.terminalKw}>SELECT </span>nombre <span className={styles.terminalKw}>FROM </span>jorge;
+                    </p>
                     <h1 className={styles.heroName}>{profile.name}</h1>
                     <p className={styles.heroRole}>{profile.role}</p>
                     <p className={styles.heroPos}>
@@ -742,7 +746,10 @@ export default function Home() {
                     <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
                   </div>
                   <div className={styles.windowPad}>
-                    <p className={styles.promptLine}><span className={styles.sign}>jorge@bi:~$</span>ls proyectos/</p>
+                    <p className={styles.promptLine}>
+                      <span className={styles.sign}>jorge@bi=#</span>
+                      <span className={styles.terminalKw}>SELECT * FROM </span>proyectos;
+                    </p>
                     <ProjectsSection projects={projects} />
                   </div>
                 </div>
