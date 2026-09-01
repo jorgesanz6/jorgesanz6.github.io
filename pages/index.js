@@ -169,6 +169,94 @@ function TerminalStats({ stats }) {
   )
 }
 
+const MONTH_LABELS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+
+function GithubActivity() {
+  const [data, setData] = useState(null)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(`https://github-contributions-api.jogruber.de/v4/${profile.github}?y=last`)
+      .then((r) => {
+        if (!r.ok) throw new Error('bad response')
+        return r.json()
+      })
+      .then((d) => {
+        if (!cancelled) setData(d)
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (failed || !data || !data.contributions) return null
+
+  const days = data.contributions
+  const leadingBlanks = new Date(`${days[0].date}T00:00:00`).getDay()
+  const cells = [...Array(leadingBlanks).fill(null), ...days]
+  const weeks = []
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7))
+
+  let lastMonth = -1
+
+  return (
+    <div className={styles.terminal}>
+      <div className={styles.terminalBar}>
+        <span className={styles.terminalDot} style={{ background: '#f87171' }} />
+        <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
+        <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
+      </div>
+      <div className={styles.windowPad}>
+        <p className={styles.promptLine}>
+          <span className={styles.sign}>jorge@bi:~$</span>git log --since=&quot;1 year ago&quot; --oneline | wc -l
+        </p>
+        <p className={styles.ghTotal}>{data.total?.lastYear ?? 0} contribuciones en el último año, en vivo desde GitHub</p>
+        <div className={styles.ghGraph}>
+          <div className={styles.ghMonths}>
+            {weeks.map((week, i) => {
+              const firstReal = week.find((d) => d)
+              if (!firstReal) return <span key={i} className={styles.ghMonthLabel} />
+              const m = new Date(`${firstReal.date}T00:00:00`).getMonth()
+              const label = m !== lastMonth ? MONTH_LABELS[m] : ''
+              lastMonth = m
+              return (
+                <span key={i} className={styles.ghMonthLabel}>{label}</span>
+              )
+            })}
+          </div>
+          <div className={styles.ghWeeks}>
+            {weeks.map((week, wi) => (
+              <div key={wi} className={styles.ghWeekCol}>
+                {week.map((day, di) => (
+                  <span
+                    key={di}
+                    className={styles.ghDay}
+                    data-level={day ? day.level : -1}
+                    title={day ? `${day.count} contribuciones el ${day.date}` : undefined}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.ghLegend}>
+          <span>Menos</span>
+          <span className={styles.ghDay} data-level={0} />
+          <span className={styles.ghDay} data-level={1} />
+          <span className={styles.ghDay} data-level={2} />
+          <span className={styles.ghDay} data-level={3} />
+          <span className={styles.ghDay} data-level={4} />
+          <span>Más</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function SectionHeading({ kicker, title }) {
   return (
     <h2 className={styles.sectionTitle}>
@@ -672,6 +760,9 @@ export default function Home() {
                 <p className={styles.statsCaption}>
                   {stats.map((s) => s.label).join(' · ')}
                 </p>
+                <div className={styles.ghSpacer}>
+                  <GithubActivity />
+                </div>
                 <div className={styles.expList}>
                   {experience.map((e, i) => (
                     <div key={i} className={styles.expItem}>
