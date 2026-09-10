@@ -1,7 +1,21 @@
 import Head from 'next/head'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { profile, skills, projects, experience, cvUrl, cvFilename, stats, methodology, methodologyIntro, linkedinUrl } from '../lib/data'
+import {
+  profile,
+  skills,
+  projects,
+  experience,
+  cvUrl,
+  cvFilename,
+  stats,
+  methodology,
+  methodologyIntro,
+  certifications,
+  education,
+  languages,
+  linkedinUrl,
+} from '../lib/data'
 import { getAnswer, suggestions } from '../lib/faq'
 import { notifyCvDownload, notifyCvEmailOptIn } from '../lib/notify'
 import styles from '../styles/Home.module.css'
@@ -102,111 +116,14 @@ const METHOD_ICONS = [
   <svg key="trending" {...ICON_PROPS}><path d="M23 6l-9.5 9.5-5-5L1 18" /><path d="M17 6h6v6" /></svg>,
 ]
 
-const QUERY_SEGMENTS = [
-  { text: 'SELECT ', kw: true },
-  { text: 'impacto ' },
-  { text: 'FROM ', kw: true },
-  { text: 'jorge ' },
-  { text: 'WHERE ', kw: true },
-  { text: 'año >= ' },
-  { text: '2022', str: true },
-  { text: ';' },
-]
-const QUERY_TEXT = QUERY_SEGMENTS.map((s) => s.text).join('')
+const STATUS_CLASS = {
+  'En uso': 'statusLive',
+  'Terminado': 'statusDone',
+  'En progreso': 'statusProgress',
+}
 
-function TerminalStats({ stats }) {
-  const ref = useRef(null)
-  const [active, setActive] = useState(false)
-  const [typed, setTyped] = useState(0)
-  const [rowsShown, setRowsShown] = useState(0)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduceMotion || typeof IntersectionObserver === 'undefined') {
-      setTyped(QUERY_TEXT.length)
-      setRowsShown(stats.length)
-      return
-    }
-
-    const rect = el.getBoundingClientRect()
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      setActive(true)
-      return
-    }
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setActive(true)
-          io.disconnect()
-        }
-      },
-      { threshold: 0.3 }
-    )
-    io.observe(el)
-
-    const fallback = setTimeout(() => setActive(true), 2500)
-
-    return () => {
-      io.disconnect()
-      clearTimeout(fallback)
-    }
-  }, [stats.length])
-
-  useEffect(() => {
-    if (!active || typed >= QUERY_TEXT.length) return
-    const t = setTimeout(() => setTyped((n) => n + 1), 55)
-    return () => clearTimeout(t)
-  }, [active, typed])
-
-  useEffect(() => {
-    if (typed < QUERY_TEXT.length || rowsShown >= stats.length) return
-    const t = setTimeout(() => setRowsShown((n) => n + 1), 280)
-    return () => clearTimeout(t)
-  }, [typed, rowsShown, stats.length])
-
-  let remaining = typed
-  const segments = QUERY_SEGMENTS.map((seg, i) => {
-    const take = Math.max(0, Math.min(seg.text.length, remaining))
-    remaining -= seg.text.length
-    if (take === 0) return null
-    const cls = seg.kw ? styles.terminalKw : seg.str ? styles.terminalStr : undefined
-    return (
-      <span key={i} className={cls}>
-        {seg.text.slice(0, take)}
-      </span>
-    )
-  })
-
-  const queryDone = typed >= QUERY_TEXT.length
-
-  return (
-    <div className={styles.terminal} ref={ref}>
-      <div className={styles.terminalBar}>
-        <span className={styles.terminalDot} style={{ background: '#f87171' }} />
-        <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
-        <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
-      </div>
-      <div className={styles.terminalBody}>
-        <div className={styles.terminalQuery}>
-          {segments}
-          {!queryDone && <span className={styles.terminalCursor} />}
-        </div>
-        {stats.map((s, i) => (
-          <div
-            key={s.key}
-            className={`${styles.terminalRow} ${i < rowsShown ? styles.terminalRowVisible : styles.terminalRowHidden}`}
-          >
-            <span className={styles.terminalField}>{s.key}</span>
-            <span className={styles.terminalValue}>{s.value}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+function StatusPill({ status }) {
+  return <span className={`${styles.statusPill} ${styles[STATUS_CLASS[status] || 'statusDone']}`}>{status}</span>
 }
 
 const MONTH_LABELS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
@@ -249,6 +166,7 @@ function GithubActivity() {
         <span className={styles.terminalDot} style={{ background: '#f87171' }} />
         <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
         <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
+        <span className={styles.windowLabel}>jorge@bi ~ actividad.sql</span>
       </div>
       <div className={styles.windowPad}>
         <p className={styles.promptLine}>
@@ -297,12 +215,13 @@ function GithubActivity() {
   )
 }
 
-function SectionHeading({ kicker, title }) {
+function SectionHeading({ kicker, title, intro }) {
   return (
-    <h2 className={styles.sectionTitle}>
-      <span className={styles.sectionKicker}>{kicker}</span>
-      {title}
-    </h2>
+    <div>
+      <span className={styles.eyebrow}>{kicker}</span>
+      <h2 className={styles.sectionTitle}>{title}</h2>
+      {intro && <p className={styles.sectionIntro}>{intro}</p>}
+    </div>
   )
 }
 
@@ -312,7 +231,7 @@ function ProjectDetailBody({ project }) {
       <p className={styles.projectDesc}>{project.description}</p>
       <div className={styles.projectTech}>
         {project.tech.map((t) => (
-          <span key={t} className={styles.techTag}>{t}</span>
+          <span key={t} className={styles.tag}>{t}</span>
         ))}
       </div>
       {project.problem && (
@@ -380,7 +299,7 @@ function ProjectModal({ project, onClose }) {
 
         <div className={styles.modalHeader}>
           <h3 className={styles.modalTitle}>{project.name}</h3>
-          <span className={styles.projectStatus}>{project.status}</span>
+          <StatusPill status={project.status} />
         </div>
 
         {images.length > 0 && (
@@ -496,38 +415,79 @@ function ProjectModal({ project, onClose }) {
 }
 
 function ProjectsSection({ projects: list }) {
-  const [activeIndex, setActiveIndex] = useState(null)
+  const [activeProject, setActiveProject] = useState(null)
+
+  const featured = list.find((p) => p.name.includes('Documentación')) || list[0]
+  const rest = list.filter((p) => p !== featured)
 
   return (
     <>
+      <article className={styles.caseStudy}>
+        <div className={styles.caseMeta}>
+          <StatusPill status={featured.status} />
+          <span className={styles.eyebrow}>caso destacado</span>
+        </div>
+        <h3 className={styles.caseTitle}>{featured.name}</h3>
+        <div className={styles.caseBody}>
+          <div>
+            <span className={styles.caseColLabel}>El problema</span>
+            <p>{featured.problem}</p>
+          </div>
+          <div>
+            <span className={styles.caseColLabel}>La solución</span>
+            <p>{featured.description}</p>
+          </div>
+        </div>
+        {featured.approach && (
+          <div className={styles.caseApproach}>
+            <span className={styles.caseColLabel}>Cómo funciona</span>
+            <ul>
+              {featured.approach.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {featured.images && featured.images.length > 0 && (
+          <div className={styles.caseThumbs}>
+            {featured.images.map((src, i) => (
+              <button key={src} type="button" onClick={() => setActiveProject(featured)} aria-label={`Ver capturas de ${featured.name}`}>
+                <img src={src} alt="" loading="lazy" />
+              </button>
+            ))}
+          </div>
+        )}
+        <div className={styles.tagRow}>
+          {featured.tech.map((t) => (
+            <span key={t} className={styles.tag}>{t}</span>
+          ))}
+        </div>
+      </article>
+
       <div className={styles.projectList}>
-        {list.map((p, i) => (
-          <div key={i} className={styles.project}>
-            <div className={styles.projectBody}>
-              <div className={styles.projectHeader}>
-                <span className={styles.projectName}>{p.name}</span>
-                <span className={styles.projectStatus}>{p.status}</span>
-              </div>
+        {rest.map((p) => (
+          <div key={p.name} className={styles.projectRow}>
+            <div className={styles.projectHead}>
+              <span className={styles.projectName}>{p.name}</span>
+              <StatusPill status={p.status} />
+            </div>
+            <div>
               <p className={styles.projectDesc}>{p.description}</p>
-              <div className={styles.projectTech}>
+              {p.images && p.images.length > 0 && (
+                <div className={styles.thumbRow}>
+                  {p.images.slice(0, 4).map((src) => (
+                    <button key={src} type="button" onClick={() => setActiveProject(p)} aria-label={`Ver capturas de ${p.name}`}>
+                      <img src={src} alt="" loading="lazy" />
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className={styles.tagRow} style={{ marginBottom: '0.75rem' }}>
                 {p.tech.map((t) => (
-                  <span key={t} className={styles.techTag}>{t}</span>
+                  <span key={t} className={styles.tag}>{t}</span>
                 ))}
               </div>
-              {p.images && (
-                <button
-                  type="button"
-                  className={styles.projectCover}
-                  onClick={() => setActiveIndex(i)}
-                  aria-label={`Ver capturas de ${p.name}`}
-                >
-                  <img src={p.images[0]} alt={`${p.name} — vista previa`} loading="lazy" />
-                  {p.images.length > 1 && (
-                    <span className={styles.projectCoverCount}>+{p.images.length - 1} más</span>
-                  )}
-                </button>
-              )}
-              <button type="button" className={styles.projectLink} onClick={() => setActiveIndex(i)}>
+              <button type="button" className={styles.projectLink} onClick={() => setActiveProject(p)}>
                 Ver detalle
               </button>
             </div>
@@ -535,10 +495,65 @@ function ProjectsSection({ projects: list }) {
         ))}
       </div>
 
-      {activeIndex !== null && (
-        <ProjectModal project={list[activeIndex]} onClose={() => setActiveIndex(null)} />
+      {activeProject && (
+        <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />
       )}
     </>
+  )
+}
+
+const DAY_TAGS = ['Power BI', 'DAX', 'Power Query (M)', 'SQL', 'Modelado dimensional']
+const NIGHT_TAGS = ['Next.js', 'React', 'PWA', 'Claude Code', 'LLMs']
+
+function PerspectiveSection() {
+  const [mode, setMode] = useState('day')
+
+  return (
+    <section className={styles.band + ' ' + styles.section} id="perfil">
+      <div className={styles.container}>
+        <Reveal>
+          <div className={styles.toggleRow}>
+            <div>
+              <span className={styles.eyebrow}>enfoque</span>
+              <h2 className={styles.perspectiveTitleSm}>Dos caras del mismo trabajo</h2>
+            </div>
+            <div className={styles.toggleGroup} role="tablist">
+              <button
+                className={`${styles.toggleBtn} ${mode === 'day' ? styles.toggleBtnActive : ''}`}
+                onClick={() => setMode('day')}
+              >
+                ☀ De día · Consultor BI
+              </button>
+              <button
+                className={`${styles.toggleBtn} ${mode === 'night' ? styles.toggleBtnActive : ''}`}
+                onClick={() => setMode('night')}
+              >
+                ☾ De noche · Product Builder
+              </button>
+            </div>
+          </div>
+
+          <div className={`${styles.perspective} ${mode === 'day' ? styles.perspectiveActive : ''}`}>
+            <h3 className={styles.perspectiveTitle}>De día: BI &amp; analítica estratégica</h3>
+            <p className={styles.perspectiveText}>
+              Diseño de modelos tabulares, DAX, optimización de queries y tableros de control orientados a negocio y operaciones. Interlocución directa con áreas de finanzas y dirección para traducir preguntas de negocio en datos.
+            </p>
+            <div className={styles.tagRow}>
+              {DAY_TAGS.map((t) => <span key={t} className={styles.tag}>{t}</span>)}
+            </div>
+          </div>
+          <div className={`${styles.perspective} ${mode === 'night' ? styles.perspectiveActive : ''}`}>
+            <h3 className={styles.perspectiveTitle}>De noche: software y automatización con IA</h3>
+            <p className={styles.perspectiveText}>
+              Construcción de herramientas propias para resolver problemas sin solución directa en el mercado: pipelines de datos, scraping, integración de LLMs y aplicaciones en producción de uso diario.
+            </p>
+            <div className={styles.tagRow}>
+              {NIGHT_TAGS.map((t) => <span key={t} className={styles.tag}>{t}</span>)}
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
   )
 }
 
@@ -557,10 +572,11 @@ function AskWidget() {
     <section className={`${styles.band} ${styles.section}`} id="pregunta">
       <div className={styles.container}>
         <Reveal>
-          <SectionHeading kicker="Charla rápida" title="Pregúntame algo" />
-          <p className={styles.askHint}>
-            Preguntas rápidas sobre mi trayectoria, mi stack o mis proyectos — respondidas al momento, sin que tengas que leer toda la página.
-          </p>
+          <SectionHeading
+            kicker="Charla rápida"
+            title="Pregúntame algo"
+            intro="Preguntas rápidas sobre mi trayectoria, mi stack o mis proyectos — respondidas al momento, sin que tengas que leer toda la página."
+          />
 
           <div className={styles.askChips}>
             {suggestions.map((s) => (
@@ -654,6 +670,13 @@ export default function Home() {
     setCvClicked(true)
   }
 
+  const statLine = stats.map((s, i) => (
+    <span key={s.key}>
+      <span className={styles.statNum}>{s.value}</span> {s.label}
+      {i < stats.length - 1 ? ' · ' : ''}
+    </span>
+  ))
+
   return (
     <>
       <Head>
@@ -710,12 +733,18 @@ export default function Home() {
       <div className={styles.page}>
         <nav className={styles.nav}>
           <div className={styles.navInner}>
-            <span className={styles.navName}>JS</span>
+            <span className={styles.navName}><span>~</span>/jorgesanz</span>
             <div className={styles.navLinks}>
-              <a href="#proyectos">Proyectos</a>
-              <a href="#experiencia">Experiencia</a>
-              <a href="#pregunta">Pregúntame</a>
-              <a href="#contacto">Contacto</a>
+              <div className={styles.navAnchors}>
+                <a href="#proyectos">Proyectos</a>
+                <a href="#experiencia">Experiencia</a>
+                <a href="#credenciales">Certificaciones</a>
+                <a href="#pregunta">Pregúntame</a>
+                <a href="#contacto">Contacto</a>
+              </div>
+              <a href={cvUrl} download={cvFilename} data-goatcounter-click="cv-download" onClick={handleCvClick} className={styles.navCv}>
+                CV
+              </a>
               <ThemeToggle />
             </div>
           </div>
@@ -725,53 +754,72 @@ export default function Home() {
 
           {/* HERO */}
           <section className={styles.band + ' ' + styles.hero}>
-            <div className={styles.heroGrid} aria-hidden="true" />
             <div className={styles.container}>
-              <div className={styles.heroContent}>
+              <div className={styles.heroHead}>
+                <div>
+                  <div className={styles.avatarRow}>
+                    <img className={styles.avatar} src="/avatar.jpg" alt={profile.name} />
+                    <span className={styles.eyebrow}>perfil</span>
+                  </div>
+                  <h1 className={styles.heroName}>{profile.name}</h1>
+                  <p className={styles.heroRole}>{profile.role} — {profile.location}</p>
+                </div>
                 <div className={styles.terminal}>
                   <div className={styles.terminalBar}>
                     <span className={styles.terminalDot} style={{ background: '#f87171' }} />
                     <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
                     <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
-                    <span className={styles.windowLabel}>jorgesanz6.github.io</span>
+                    <span className={styles.windowLabel}>jorge@bi ~ perfil.sql</span>
                   </div>
                   <div className={styles.windowPad}>
                     <p className={styles.promptLine}>
                       <span className={styles.sign}>jorge@bi=#</span>
-                      <span className={styles.terminalKw}>SELECT </span>nombre <span className={styles.terminalKw}>FROM </span>jorge;
+                      <span className={styles.terminalKw}>SELECT </span>nombre, rol, ubicacion
                     </p>
-                    <h1 className={styles.heroName}>{profile.name}</h1>
-                    <p className={styles.heroRole}>{profile.role}</p>
-                    <p className={styles.heroPos}>
-                      Reduzco la distancia entre una pregunta de negocio y la respuesta en un dashboard — y cuando la herramienta que necesito no existe, la construyo yo mismo.
-                    </p>
-                    <div className={styles.heroActions}>
-                      <a href="#contacto" className={styles.btnPrimary}>Contactar</a>
-                      <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className={styles.contactLinkItem}>
-                        LinkedIn
-                      </a>
-                      <a
-                        href={`https://github.com/${profile.github}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.contactLinkItem}
-                      >
-                        GitHub
-                      </a>
-                      <a
-                        href={cvUrl}
-                        download={cvFilename}
-                        data-goatcounter-click="cv-download"
-                        onClick={handleCvClick}
-                        className={styles.contactLinkItem}
-                      >
-                        Descargar CV
-                      </a>
-                    </div>
-                    <CvCapture visible={cvClicked} onDone={() => setCvClicked(false)} />
+                    <p className={styles.promptLine}><span className={styles.terminalKw}>FROM </span>jorge</p>
+                    <p className={styles.promptLine}><span className={styles.terminalKw}>WHERE </span>foco = <span className={styles.terminalStr}>&apos;impacto de negocio&apos;</span>;</p>
+                    <p className={styles.terminalOut}>→ 1 fila · {profile.name}, {profile.role}, {profile.location}</p>
                   </div>
                 </div>
               </div>
+
+              <p className={styles.heroPos}>
+                &quot;Reduzco la distancia entre una pregunta de negocio y la respuesta en un dashboard — y cuando la herramienta que necesito no existe, la construyo yo mismo.&quot;
+              </p>
+              <p className={styles.heroBio}>{profile.bio}</p>
+
+              <div className={styles.quickFacts}>
+                <span className={`${styles.factChip} ${styles.factChipStrong}`}>{stats[1].value} años en datos</span>
+                <span className={`${styles.factChip} ${styles.factChipStrong}`}>{stats[2].value} años en BI</span>
+                <span className={styles.factChip}>Power BI · DAX · SQL</span>
+                <span className={styles.factChip}>{languages[0]} · {languages[1]}</span>
+                <span className={styles.factChip}>{profile.location}</span>
+              </div>
+
+              <div className={styles.heroActions}>
+                <a href="#contacto" className={styles.btnPrimary}>Contactar</a>
+                <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className={styles.contactLinkItem}>
+                  LinkedIn
+                </a>
+                <a
+                  href={`https://github.com/${profile.github}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.contactLinkItem}
+                >
+                  GitHub
+                </a>
+                <a
+                  href={cvUrl}
+                  download={cvFilename}
+                  data-goatcounter-click="cv-download"
+                  onClick={handleCvClick}
+                  className={styles.contactLinkItem}
+                >
+                  Descargar CV
+                </a>
+              </div>
+              <CvCapture visible={cvClicked} onDone={() => setCvClicked(false)} />
             </div>
           </section>
 
@@ -779,20 +827,60 @@ export default function Home() {
           <section className={styles.band + ' ' + styles.section} id="proyectos">
             <div className={styles.container}>
               <Reveal>
-                <SectionHeading kicker="Lo que he construido" title="Proyectos" />
-                <div className={styles.terminal}>
-                  <div className={styles.terminalBar}>
-                    <span className={styles.terminalDot} style={{ background: '#f87171' }} />
-                    <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
-                    <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
-                  </div>
-                  <div className={styles.windowPad}>
-                    <p className={styles.promptLine}>
-                      <span className={styles.sign}>jorge@bi=#</span>
-                      <span className={styles.terminalKw}>SELECT * FROM </span>proyectos;
-                    </p>
-                    <ProjectsSection projects={projects} />
-                  </div>
+                <SectionHeading
+                  kicker="Lo que he construido"
+                  title="Proyectos"
+                  intro="Software propio, en producción o uso diario real — con capturas reales, no maquetas."
+                />
+                <div style={{ marginTop: '2.5rem' }}>
+                  <ProjectsSection projects={projects} />
+                </div>
+              </Reveal>
+            </div>
+          </section>
+
+          {/* ACTIVIDAD GITHUB */}
+          <section className={styles.band + ' ' + styles.tint + ' ' + styles.section} id="actividad">
+            <div className={styles.container}>
+              <Reveal>
+                <SectionHeading kicker="En vivo desde GitHub" title="Actividad" />
+                <div style={{ marginTop: '2rem' }}>
+                  <GithubActivity />
+                </div>
+              </Reveal>
+            </div>
+          </section>
+
+          {/* ENFOQUE */}
+          <PerspectiveSection />
+
+          {/* CÓMO TRABAJO */}
+          <section className={styles.band + ' ' + styles.section}>
+            <div className={styles.container}>
+              <Reveal>
+                <SectionHeading kicker="Metodología" title="Cómo trabajo" />
+                <p className={styles.methodIntro} style={{ marginTop: '1.5rem' }}>{methodologyIntro}</p>
+                <ol className={styles.methodList}>
+                  {methodology.map((step, i) => (
+                    <li key={step.title} className={styles.methodItem}>
+                      <span className={styles.methodNumber}>{METHOD_ICONS[i]}</span>
+                      <p className={styles.methodTitle}>{step.title}</p>
+                      <p className={styles.methodDesc}>{step.description}</p>
+                    </li>
+                  ))}
+                </ol>
+                <span className={`${styles.eyebrow} ${styles.subKicker}`}>Con qué trabajo</span>
+                <div className={styles.skillsGrid}>
+                  {skills.map((group) => (
+                    <div key={group.group} className={styles.skillGroup}>
+                      <p className={styles.skillGroupName}>{group.group}</p>
+                      <div className={styles.skillTags}>
+                        {group.items.map((item) => (
+                          <span key={item} className={styles.tag}>{item}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </Reveal>
             </div>
@@ -803,24 +891,19 @@ export default function Home() {
             <div className={styles.container}>
               <Reveal>
                 <SectionHeading kicker="Cómo he llegado hasta aquí" title="Experiencia" />
-                <TerminalStats stats={stats} />
-                <p className={styles.statsCaption}>
-                  {stats.map((s) => s.label).join(' · ')}
-                </p>
-                <div className={styles.ghSpacer}>
-                  <GithubActivity />
-                </div>
+                <p className={styles.statLine} style={{ marginTop: '2rem' }}>{statLine}</p>
                 <div className={styles.expList}>
                   {experience.map((e, i) => (
                     <div key={i} className={styles.expItem}>
-                      <div className={styles.expMeta}>
+                      <div>
                         <span className={styles.expPeriod}>{e.period}</span>
                       </div>
-                      <div className={styles.expContent}>
+                      <div>
                         <p className={styles.expRole}>{e.role}</p>
                         <p className={styles.expCompany}>{e.company}</p>
                         <p className={styles.expDesc}>{e.description}</p>
-                        {(e.problem || e.approach || e.impact) && (
+                        {e.impact && <p className={styles.expImpact}>Impacto: {e.impact}</p>}
+                        {(e.problem || e.approach) && (
                           <details className={styles.projectDetails}>
                             <summary>Ver caso completo</summary>
                             {e.problem && (
@@ -843,60 +926,44 @@ export default function Home() {
                                 )}
                               </div>
                             )}
-                            {e.impact && (
-                              <div className={styles.projectDetailBlock}>
-                                <span className={styles.projectDetailLabel}>Impacto</span>
-                                <p>{e.impact}</p>
-                              </div>
-                            )}
                           </details>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
-                <a
-                  href={cvUrl}
-                  download={cvFilename}
-                  data-goatcounter-click="cv-download"
-                  onClick={handleCvClick}
-                  className={styles.projectLink}
-                >
-                  Ver historial completo en el CV
-                </a>
               </Reveal>
             </div>
           </section>
 
-          {/* CÓMO TRABAJO */}
-          <section className={styles.band + ' ' + styles.section}>
+          {/* CERTIFICACIONES Y EDUCACIÓN */}
+          <section className={styles.band + ' ' + styles.section} id="credenciales">
             <div className={styles.container}>
               <Reveal>
-                <SectionHeading kicker="Metodología" title="Cómo trabajo" />
-                <p className={styles.methodIntro}>{methodologyIntro}</p>
-                <div className={styles.methodList}>
-                  {methodology.map((step, i) => (
-                    <div key={step.title} className={styles.methodItem}>
-                      <span className={styles.methodNumber}>{METHOD_ICONS[i]}</span>
-                      <div>
-                        <p className={styles.methodTitle}>{step.title}</p>
-                        <p className={styles.methodDesc}>{step.description}</p>
+                <SectionHeading kicker="Credenciales" title="Certificaciones y educación" />
+                <div className={styles.credsGrid} style={{ marginTop: '2.5rem' }}>
+                  <div>
+                    <span className={styles.credsColLabel}>Certificaciones (últimos 6 meses)</span>
+                    <ul className={styles.certList}>
+                      {certifications.map((c) => (
+                        <li key={c}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <span className={styles.credsColLabel}>Educación</span>
+                    {education.map((e) => (
+                      <div key={e.degree} className={styles.eduItem}>
+                        <div className={styles.eduDegree}>{e.degree}</div>
+                        <div className={styles.eduSchool}>{e.school} · {e.year}</div>
                       </div>
+                    ))}
+                    <div className={styles.langRow}>
+                      {languages.map((l) => (
+                        <span key={l} className={styles.factChip}>{l}</span>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <p className={`${styles.sectionKicker} ${styles.subKicker}`}>Con qué trabajo</p>
-                <div className={styles.skillsGrid}>
-                  {skills.map((group) => (
-                    <div key={group.group} className={styles.skillGroup}>
-                      <p className={styles.skillGroupName}>{group.group}</p>
-                      <div className={styles.skillTags}>
-                        {group.items.map((item) => (
-                          <span key={item} className={styles.tag}>{item}</span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                  </div>
                 </div>
               </Reveal>
             </div>

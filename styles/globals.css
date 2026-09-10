@@ -1,39 +1,60 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --base: #0A0E14;
-  --surface: #111722;
-  --band-tint: #0D131C;
-  --text: #D7DEE8;
-  --text-muted: #8894A3;
-  --accent: #5FE1A1;
-  --accent-2: #2E9165;
-  --accent-light: rgba(95, 225, 161, 0.12);
-  --accent-btn: #2E9165;
-  --accent-btn-hover: #256F4E;
-  --warn: #F2C94C;
-  --border: #1F2733;
-  --nav-bg: rgba(10, 14, 20, 0.85);
-  --font: 'IBM Plex Sans', system-ui, sans-serif;
-  --font-heading: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --base: #0E0D0B;
+  --surface: #16140F;
+  --band-tint: #121109;
+  --text: #EDE8DE;
+  --text-muted: #A8A093;
+  --text-faint: #6E685D;
+  --accent: #C97F45;
+  --accent-ink: #1B1108;
+  --accent-light: rgba(201, 127, 69, 0.12);
+  --accent-border: rgba(201, 127, 69, 0.4);
+  --accent-btn: #C97F45;
+  --accent-btn-hover: #E0975C;
+  --success: #6FA97A;
+  --success-light: rgba(111, 169, 122, 0.12);
+  --warn: #B9A06A;
+  --warn-light: rgba(185, 160, 106, 0.12);
+  --border: #2A271F;
+  --border-strong: #3A362B;
+  --nav-bg: rgba(14, 13, 11, 0.88);
+  --font: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'Source Serif 4', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   --max-w: 900px;
+
+  /* Terminal chrome stays dark regardless of site theme (readability of the
+     GitHub activity gradient and code syntax colors on a light background). */
+  --term-bg: #0E0D0B;
+  --term-surface: #16140F;
+  --term-border: #2A271F;
+  --term-text: #EDE8DE;
+  --term-text-muted: #A8A093;
+  --term-text-faint: #6E685D;
 }
 
 :root[data-theme="light"] {
-  --base: #F5F6F5;
-  --surface: #FFFFFF;
-  --band-tint: #EFF1F0;
-  --text: #12181F;
-  --text-muted: #5A6570;
-  --accent: #178F5E;
-  --accent-2: #12704A;
-  --accent-light: rgba(23, 143, 94, 0.1);
-  --accent-btn: #12704A;
-  --accent-btn-hover: #0E5A3A;
-  --warn: #A6720A;
-  --border: #DEE2E4;
-  --nav-bg: rgba(247, 248, 247, 0.88);
+  --base: #FAF7F0;
+  --surface: #F1ECE0;
+  --band-tint: #F5F1E6;
+  --text: #221F19;
+  --text-muted: #625B4C;
+  --text-faint: #8B8371;
+  --accent: #A85F26;
+  --accent-ink: #FFFFFF;
+  --accent-light: rgba(168, 95, 38, 0.08);
+  --accent-border: rgba(168, 95, 38, 0.35);
+  --accent-btn: #A85F26;
+  --accent-btn-hover: #8F4E1E;
+  --success: #3F7A4E;
+  --success-light: rgba(63, 122, 78, 0.08);
+  --warn: #8A7238;
+  --warn-light: rgba(138, 114, 56, 0.08);
+  --border: #DED6C4;
+  --border-strong: #C9BFA8;
+  --nav-bg: rgba(250, 247, 240, 0.9);
 }
 
 html { font-size: 16px; scroll-behavior: smooth; }
@@ -58,7 +79,7 @@ html { font-size: 16px; scroll-behavior: smooth; }
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--text-faint);
 }
 
 body {
