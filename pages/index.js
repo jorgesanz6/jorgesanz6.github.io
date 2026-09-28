@@ -131,6 +131,7 @@ const MONTH_LABELS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 's
 function GithubActivity() {
   const [data, setData] = useState(null)
   const [failed, setFailed] = useState(false)
+  const graphRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -150,7 +151,38 @@ function GithubActivity() {
     }
   }, [])
 
-  if (failed || !data || !data.contributions) return null
+  useEffect(() => {
+    if (!data || !graphRef.current) return
+    // El contenedor puede ser más estrecho que el grid completo (móvil) —
+    // arrancamos con la semana actual a la vista, no la más antigua.
+    graphRef.current.scrollLeft = graphRef.current.scrollWidth
+  }, [data])
+
+  if (failed || !data || !data.contributions) {
+    return failed ? (
+      <div className={styles.terminal}>
+        <div className={styles.terminalBar}>
+          <span className={styles.terminalDot} style={{ background: '#f87171' }} />
+          <span className={styles.terminalDot} style={{ background: '#fbbf24' }} />
+          <span className={styles.terminalDot} style={{ background: '#4ade80' }} />
+          <span className={styles.windowLabel}>jorge@bi ~ actividad.sql</span>
+        </div>
+        <div className={styles.windowPad}>
+          <p className={styles.promptLine}>
+            <span className={styles.sign}>jorge@bi=#</span>
+            <span className={styles.terminalKw}>SELECT COUNT</span>(*) <span className={styles.terminalKw}>FROM </span>contribuciones;
+          </p>
+          <p className={styles.ghTotal}>
+            No se pudo cargar la actividad en vivo ahora mismo — histórico real en{' '}
+            <a href={`https://github.com/${profile.github}`} target="_blank" rel="noopener noreferrer" className={styles.contactLinkItem}>
+              github.com/{profile.github}
+            </a>
+            .
+          </p>
+        </div>
+      </div>
+    ) : null
+  }
 
   const days = data.contributions
   const leadingBlanks = new Date(`${days[0].date}T00:00:00`).getDay()
@@ -174,7 +206,7 @@ function GithubActivity() {
           <span className={styles.terminalKw}>SELECT COUNT</span>(*) <span className={styles.terminalKw}>FROM </span>contribuciones <span className={styles.terminalKw}>WHERE </span>fecha &gt;= <span className={styles.terminalStr}>&apos;hace 1 año&apos;</span>;
         </p>
         <p className={styles.ghTotal}>{data.total?.lastYear ?? 0} contribuciones en el último año, en vivo desde GitHub</p>
-        <div className={styles.ghGraph}>
+        <div className={styles.ghGraph} ref={graphRef}>
           <div className={styles.ghMonths}>
             {weeks.map((week, i) => {
               const firstReal = week.find((d) => d)
