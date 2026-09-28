@@ -135,17 +135,30 @@ function GithubActivity() {
 
   useEffect(() => {
     let cancelled = false
-    fetch(`https://github-contributions-api.jogruber.de/v4/${profile.github}?y=last`)
-      .then((r) => {
-        if (!r.ok) throw new Error('bad response')
-        return r.json()
-      })
-      .then((d) => {
-        if (!cancelled) setData(d)
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true)
-      })
+
+    function load(attemptsLeft) {
+      fetch(`https://github-contributions-api.jogruber.de/v4/${profile.github}?y=last`)
+        .then((r) => {
+          if (!r.ok) throw new Error('bad response')
+          return r.json()
+        })
+        .then((d) => {
+          if (!cancelled) setData(d)
+        })
+        .catch(() => {
+          if (cancelled) return
+          // La API es un servicio gratuito de terceros — un fallo suelto no
+          // debe vaciar la sección entera, se reintenta un par de veces antes
+          // de rendirse.
+          if (attemptsLeft > 0) {
+            setTimeout(() => load(attemptsLeft - 1), 1500)
+          } else {
+            setFailed(true)
+          }
+        })
+    }
+
+    load(2)
     return () => {
       cancelled = true
     }
